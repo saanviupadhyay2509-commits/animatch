@@ -32,7 +32,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://animatch.vercel.app",
-        # Add any preview URLs Vercel gives you here
+        "https://animatch-1-15s9.onrender.com/",
     ],
     allow_credentials=True,
     allow_methods=["*"],
