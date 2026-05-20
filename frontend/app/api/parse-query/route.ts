@@ -55,7 +55,8 @@ Rules:
   const text = data.content?.[0]?.text ?? "";
 
   try {
-    const parsed = JSON.parse(text);
+    const clean = text.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
     return NextResponse.json(parsed);
   } catch {
     return NextResponse.json({ error: "Failed to parse Claude response", raw: text }, { status: 500 });
