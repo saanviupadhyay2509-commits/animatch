@@ -79,6 +79,8 @@ class AnimeResult(BaseModel):
     match_score: float
     similarity: float
     summary: str | None
+    matched_filters: list[str]
+    total_filters: int
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────

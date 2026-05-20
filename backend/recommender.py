@@ -119,17 +119,42 @@ def recommend_anime(
 
     # Serialise to list of plain dicts (JSON-safe)
     output = []
+    # Build filter match data once, outside the loop
+    requested_genres = [g.lower() for g in genres]
+    mood_genres = MOOD_MAP.get(mood, []) if mood else []
+    
+    # Count total filters the user selected
+    total = len(genres) + (1 if era and era != "any" else 0) + (1 if mood else 0)
+
     for _, row in results.iterrows():
+        anime_genres = str(row.get("Genre", row.get("genres_clean", ""))).lower()
+        anime_era    = str(row.get("era", "")).lower()
+
+        # Check which filters this anime matched
+        matched = []
+
+        for g in genres:
+            if g.lower() in anime_genres:
+                matched.append(g)
+
+        if era and era != "any" and anime_era == era.lower():
+            matched.append(era)
+
+        if mood and any(mg in anime_genres for mg in mood_genres):
+            matched.append(mood)
+
         output.append({
-            "title"      : str(row.get("Title", row.get("primaryTitle", "Unknown"))),
-            "genre"      : str(row.get("Genre", row.get("genres_clean", ""))),
-            "rating"     : round(float(row.get(RATING_COL, 0) or 0), 1),
-            "year"       : int(row["Year"]) if "Year" in row and not pd.isna(row.get("Year")) else None,
-            "votes"      : int(row["Number of Votes"]) if "Number of Votes" in row and not pd.isna(row.get("Number of Votes")) else None,
-            "era"        : str(row.get("era", "")),
-            "match_score": round(float(row["match_score"]), 4),
-            "similarity" : round(float(row["similarity"]), 4),
-            "summary"    : str(row["Summary"]) if "Summary" in row and pd.notna(row.get("Summary")) else None,
+            "title"          : str(row.get("Title", row.get("primaryTitle", "Unknown"))),
+            "genre"          : str(row.get("Genre", row.get("genres_clean", ""))),
+            "rating"         : round(float(row.get(RATING_COL, 0) or 0), 1),
+            "year"           : int(row["Year"]) if "Year" in row and not pd.isna(row.get("Year")) else None,
+            "votes"          : int(row["Number of Votes"]) if "Number of Votes" in row and not pd.isna(row.get("Number of Votes")) else None,
+            "era"            : str(row.get("era", "")),
+            "match_score"    : round(float(row["match_score"]), 4),
+            "similarity"     : round(float(row["similarity"]), 4),
+            "summary"        : str(row["Summary"]) if "Summary" in row and pd.notna(row.get("Summary")) else None,
+            "matched_filters": matched,
+            "total_filters"  : total,
         })
 
     return output
