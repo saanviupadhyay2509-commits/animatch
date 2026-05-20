@@ -34,14 +34,14 @@ function Particle({ x, delay, duration, size }: { x: string; delay: number; dura
 }
 
 const PARTICLES = [
-  { x: "10%",  delay: 0,    duration: 8,  size: 3 },
-  { x: "20%",  delay: 1.5,  duration: 11, size: 2 },
-  { x: "35%",  delay: 0.8,  duration: 9,  size: 4 },
-  { x: "50%",  delay: 2.2,  duration: 7,  size: 2 },
-  { x: "62%",  delay: 0.3,  duration: 12, size: 3 },
-  { x: "75%",  delay: 1.8,  duration: 10, size: 2 },
-  { x: "85%",  delay: 0.6,  duration: 8,  size: 4 },
-  { x: "92%",  delay: 2.8,  duration: 9,  size: 2 },
+  { x: "10%", delay: 0, duration: 8, size: 3 },
+  { x: "20%", delay: 1.5, duration: 11, size: 2 },
+  { x: "35%", delay: 0.8, duration: 9, size: 4 },
+  { x: "50%", delay: 2.2, duration: 7, size: 2 },
+  { x: "62%", delay: 0.3, duration: 12, size: 3 },
+  { x: "75%", delay: 1.8, duration: 10, size: 2 },
+  { x: "85%", delay: 0.6, duration: 8, size: 4 },
+  { x: "92%", delay: 2.8, duration: 9, size: 2 },
 ];
 
 export function Hero({ totalAnime }: { totalAnime: number }) {
@@ -53,10 +53,10 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
   });
 
   // Parallax layers — each moves at a different rate on scroll
-  const titleY      = useTransform(scrollYProgress, [0, 1], ["0%", "-30%"]);
-  const subtitleY   = useTransform(scrollYProgress, [0, 1], ["0%", "-18%"]);
-  const badgeY      = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
-  const titleOpacity   = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const titleY = useTransform(scrollYProgress, [0, 1], ["0%", "-30%"]);
+  const subtitleY = useTransform(scrollYProgress, [0, 1], ["0%", "-18%"]);
+  const badgeY = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
   const subtitleOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
@@ -75,6 +75,7 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
           left: "calc(50% - 450px)",
         }}
       />
+
       <div
         className="ambient-blob w-[550px] h-[550px]"
         style={{
@@ -86,6 +87,7 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
           animationDuration: "24s",
         }}
       />
+
       <div
         className="ambient-blob w-[400px] h-[400px]"
         style={{
@@ -100,17 +102,22 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
 
       {/* Floating particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {PARTICLES.map((p, i) => <Particle key={i} {...p} />)}
+        {PARTICLES.map((p, i) => (
+          <Particle key={i} {...p} />
+        ))}
       </div>
 
       {/* Badge */}
       <motion.div
-        style={{ y: badgeY }}
+        style={{
+          y: badgeY,
+          boxShadow:
+            "0 0 30px rgba(124,106,247,0.15), inset 0 1px 0 rgba(255,255,255,0.07)",
+        }}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className="mb-10 inline-flex items-center gap-2.5 glass rounded-full px-5 py-2 text-[11px] font-body font-medium text-purple-300/80 tracking-widest uppercase"
-        style={{ boxShadow: "0 0 30px rgba(124,106,247,0.15), inset 0 1px 0 rgba(255,255,255,0.07)" }}
       >
         <span
           className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"
@@ -133,7 +140,8 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
               fontSize: "clamp(4.5rem, 12vw, 9rem)",
               lineHeight: 1,
               letterSpacing: "-0.025em",
-              background: "linear-gradient(160deg, #ffffff 0%, #c4b5fd 30%, #818cf8 60%, #60a5fa 100%)",
+              background:
+                "linear-gradient(160deg, #ffffff 0%, #c4b5fd 30%, #818cf8 60%, #60a5fa 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -162,13 +170,22 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
       >
         <p
           className="font-body text-xl md:text-2xl"
-          style={{ color: "rgba(255,255,255,0.55)", fontWeight: 300, letterSpacing: "0.02em" }}
+          style={{
+            color: "rgba(255,255,255,0.55)",
+            fontWeight: 300,
+            letterSpacing: "0.02em",
+          }}
         >
           Discover your next obsession.
         </p>
+
         <p
           className="font-body text-base md:text-lg"
-          style={{ color: "rgba(255,255,255,0.2)", fontWeight: 300, letterSpacing: "0.03em" }}
+          style={{
+            color: "rgba(255,255,255,0.2)",
+            fontWeight: 300,
+            letterSpacing: "0.03em",
+          }}
         >
           Tell us your mood. We handle the rest.
         </p>
@@ -185,7 +202,8 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
           className="w-px"
           style={{
             height: "64px",
-            background: "linear-gradient(to bottom, rgba(124,106,247,0.6), rgba(124,106,247,0.1), transparent)",
+            background:
+              "linear-gradient(to bottom, rgba(124,106,247,0.6), rgba(124,106,247,0.1), transparent)",
           }}
           animate={{ scaleY: [0.6, 1, 0.6], opacity: [0.4, 1, 0.4] }}
           transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
