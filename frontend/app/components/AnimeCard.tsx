@@ -34,7 +34,9 @@ interface Props {
 
 export function AnimeCard({ anime, index }: Props) {
   const gradient = getGradient(anime.title);
-  const scorePercent = Math.round(anime.match_score * 100);
+  const matchedCount = anime.matched_filters?.length ?? 0;
+  const totalCount = anime.total_filters ?? 0;
+  const filtersLabel = `${matchedCount}/${totalCount} filters matched`;
 
   return (
     <motion.article
@@ -51,9 +53,9 @@ export function AnimeCard({ anime, index }: Props) {
       <div className={`h-28 bg-gradient-to-br ${gradient} relative flex items-end p-4`}>
         {/* Score badge */}
         <div className="absolute top-3 right-3 flex items-center gap-1 glass rounded-full px-2.5 py-1 text-xs font-body font-semibold text-white/90">
-          <TrendingUp className="w-3 h-3 text-purple-400" />
-          {scorePercent}% match
-        </div>
+  <TrendingUp className="w-3 h-3 text-purple-400" />
+  {filtersLabel}
+</div>
 
         {/* Rank number */}
         <span
@@ -110,21 +112,20 @@ export function AnimeCard({ anime, index }: Props) {
           )}
         </div>
 
-        {/* Match score bar */}
-        <div>
-          <div className="flex justify-between text-[10px] text-white/25 font-body mb-1">
-            <span>Match strength</span>
-            <span>{scorePercent}%</span>
-          </div>
-          <div className="score-bar">
-            <motion.div
-              className="score-bar-fill"
-              initial={{ width: 0 }}
-              animate={{ width: `${scorePercent}%` }}
-              transition={{ duration: 1, delay: index * 0.08 + 0.3, ease: "easeOut" }}
-            />
-          </div>
-        </div>
+        {/* Filter match tags */}
+{anime.matched_filters?.length > 0 && (
+  <div className="flex flex-wrap gap-1.5 pt-1">
+    {anime.matched_filters.map((f) => (
+      <span
+        key={f}
+        className="text-[10px] px-2 py-0.5 rounded-full font-body font-semibold uppercase tracking-wide
+          bg-green-500/10 border border-green-500/20 text-green-300"
+      >
+        ✓ {f}
+      </span>
+    ))}
+  </div>
+)}
 
         {/* Summary snippet */}
         {anime.summary && (

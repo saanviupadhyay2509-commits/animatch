@@ -14,6 +14,8 @@ export interface AnimeResult {
   match_score: number;
   similarity: number;
   summary: string | null;
+  matched_filters: string[];
+  total_filters: number;
 }
 
 export interface SiteMeta {
