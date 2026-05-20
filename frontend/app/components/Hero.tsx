@@ -62,7 +62,7 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
   return (
     <section
       ref={ref}
-      className="relative flex flex-col items-center justify-center pt-40 pb-28 px-6 text-center"
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center overflow-hidden"
       style={{ background: "transparent" }}
     >
       {/* Ambient blobs */}
