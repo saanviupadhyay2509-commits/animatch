@@ -1,5 +1,6 @@
 "use client";
 
+import { NaturalSearch } from "./components/NaturalSearch";
 import { useState, useRef } from "react";
 import { fetchRecommendations, type AnimeResult, type SiteMeta, type RecommendRequest } from "@/lib/api";
 import { Hero } from "./components/Hero";
@@ -39,6 +40,7 @@ export function ClientPage({ meta }: Props) {
   return (
     <>
       <Hero totalAnime={meta.total_anime} />
+      <NaturalSearch onSubmit={handleSubmit} />
       <RecommendForm meta={meta} onSubmit={handleSubmit} loading={loading} />
       <div ref={resultsRef}>
         <ResultsGrid
