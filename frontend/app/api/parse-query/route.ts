@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 300,
       system: `You are a filter parser for an anime recommendation app. 
 Given a natural language query, extract filter parameters and return ONLY a valid JSON object with no explanation or markdown.
