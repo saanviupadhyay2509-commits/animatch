@@ -51,11 +51,11 @@ export function AnimeCard({ anime, index }: Props) {
     >
       {/* Card gradient header */}
       <div className={`h-28 bg-gradient-to-br ${gradient} relative flex items-end p-4`}>
-        {/* Score badge */}
+        {/* Filter match badge */}
         <div className="absolute top-3 right-3 flex items-center gap-1 glass rounded-full px-2.5 py-1 text-xs font-body font-semibold text-white/90">
-  <TrendingUp className="w-3 h-3 text-purple-400" />
-  {filtersLabel}
-</div>
+          <TrendingUp className="w-3 h-3 text-purple-400" />
+          {filtersLabel}
+        </div>
 
         {/* Rank number */}
         <span
@@ -113,19 +113,19 @@ export function AnimeCard({ anime, index }: Props) {
         </div>
 
         {/* Filter match tags */}
-{anime.matched_filters?.length > 0 && (
-  <div className="flex flex-wrap gap-1.5 pt-1">
-    {anime.matched_filters.map((f) => (
-      <span
-        key={f}
-        className="text-[10px] px-2 py-0.5 rounded-full font-body font-semibold uppercase tracking-wide
-          bg-green-500/10 border border-green-500/20 text-green-300"
-      >
-        ✓ {f}
-      </span>
-    ))}
-  </div>
-)}
+        {anime.matched_filters?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {anime.matched_filters.map((f) => (
+              <span
+                key={f}
+                className="text-[10px] px-2 py-0.5 rounded-full font-body font-semibold uppercase tracking-wide
+                  bg-green-500/10 border border-green-500/20 text-green-300"
+              >
+                ✓ {f}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Summary snippet */}
         {anime.summary && (
@@ -135,7 +135,7 @@ export function AnimeCard({ anime, index }: Props) {
         )}
 
         {/* MAL link */}
-        
+        <a
           href={`https://myanimelist.net/search/all?q=${encodeURIComponent(anime.title)}`}
           target="_blank"
           rel="noopener noreferrer"
@@ -145,3 +145,5 @@ export function AnimeCard({ anime, index }: Props) {
         </a>
       </div>
     </motion.article>
+  );
+}
