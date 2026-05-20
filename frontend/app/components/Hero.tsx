@@ -8,7 +8,7 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
   return (
     <section className="relative flex flex-col items-center justify-center pt-36 pb-24 px-6 text-center overflow-hidden">
 
-      {/* Ambient blobs — more vivid and dramatic */}
+      {/* Ambient blobs */}
       <div
         className="ambient-blob w-[800px] h-[800px] opacity-25"
         style={{ background: "radial-gradient(circle, #7c6af7, #4f46e5)", top: "-300px", left: "calc(50% - 400px)" }}
@@ -30,7 +30,10 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
         className="mb-8 inline-flex items-center gap-2.5 glass rounded-full px-5 py-2 text-[11px] font-body font-medium text-purple-300/80 tracking-widest uppercase"
         style={{ boxShadow: "0 0 30px rgba(124,106,247,0.12), inset 0 1px 0 rgba(255,255,255,0.06)" }}
       >
-        <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" style={{ boxShadow: "0 0 6px #7c6af7" }} />
+        <span
+          className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"
+          style={{ boxShadow: "0 0 6px #7c6af7" }}
+        />
         {totalAnime.toLocaleString()} titles · AI-powered
       </motion.div>
 
@@ -65,10 +68,10 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
       >
         Discover your next obsession.
         <br />
-        <span style={{ color: "rgba(255,255,255,0.22)" }}>Tell us your mood — we'll handle the rest.</span>
+        <span style={{ color: "rgba(255,255,255,0.22)" }}>Tell us your mood. We handle the rest.</span>
       </motion.p>
 
-      {/* Thin divider line */}
+      {/* Divider line */}
       <motion.div
         className="mt-12 flex flex-col items-center gap-3"
         initial={{ opacity: 0 }}
@@ -82,6 +85,7 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
         />
       </motion.div>
+
     </section>
   );
 }
