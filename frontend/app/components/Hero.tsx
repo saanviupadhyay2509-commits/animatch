@@ -160,7 +160,7 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
             }}
             initial={{ 
               opacity: 0,
-              y: 24,
+              y: 12,
               filter: "blur(10px)",
             }}
             animate={{ 
