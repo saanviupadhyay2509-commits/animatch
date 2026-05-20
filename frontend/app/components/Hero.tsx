@@ -129,7 +129,7 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
       {/* Title with parallax */}
       <motion.div
         style={{ y: titleY, opacity: titleOpacity }}
-        className="flex items-baseline gap-0 mb-8"
+        className="flex items-center gap-0 mb-10"
         aria-label="AniMatch"
       >
         {CHARS.map((char, i) => (
@@ -139,20 +139,28 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
             style={{
               fontSize: "clamp(4.5rem, 12vw, 9rem)",
               lineHeight: 1,
-              letterSpacing: "-0.025em",
+              letterSpacing: "-0.04em",
               background:
-                "linear-gradient(160deg, #ffffff 0%, #c4b5fd 30%, #818cf8 60%, #60a5fa 100%)",
+                "linear-gradient(160deg, #ffffff 0%, #d4d4d8 35%, #a5b4fc 70%, #7dd3fc 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
-              filter: "drop-shadow(0 0 40px rgba(124,106,247,0.5))",
+              filter: "drop-shadow(0 0 32px rgba(124,106,247,0.28))",
             }}
-            initial={{ opacity: 0, y: 100, rotateX: 40 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            initial={{ 
+              opacity: 0,
+              y: 24,
+              filter: "blur(10px)",
+            }}
+            animate={{ 
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+            }}
             transition={{
-              duration: 0.9,
-              delay: i * 0.06,
-              ease: [0.22, 1, 0.36, 1],
+              duration: 1.4,
+              delay: i * 0.045,
+              ease: [0.16, 1, 0.3, 1],
             }}
           >
             {char}
