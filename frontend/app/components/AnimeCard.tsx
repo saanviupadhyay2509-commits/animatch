@@ -133,7 +133,15 @@ export function AnimeCard({ anime, index }: Props) {
             {anime.summary}
           </p>
         )}
+
+        {/* MAL link */}
+        
+          href={`https://myanimelist.net/search/all?q=${encodeURIComponent(anime.title)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-[11px] font-body font-semibold text-purple-400 hover:text-purple-300 transition-colors pt-1"
+        >
+          View on MyAnimeList →
+        </a>
       </div>
     </motion.article>
-  );
-}
