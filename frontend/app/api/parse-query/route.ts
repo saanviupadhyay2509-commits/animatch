@@ -15,19 +15,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No query provided" }, { status: 400 });
   }
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": process.env.ANTHROPIC_API_KEY!,
-      "anthropic-version": "2023-06-01",
-      "anthropic-beta": "interleaved-thinking-2025-05-14",
+      "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 300,
-      system: `You are a filter parser for an anime recommendation app. 
-Given a natural language query, extract filter parameters and return ONLY a valid JSON object with no explanation or markdown.
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.1,
+      max_tokens: 200,
+      messages: [
+        {
+          role: "system",
+          content: `You are a filter parser for an anime recommendation app.
+Given a natural language query, extract filter parameters and return ONLY a raw JSON object with no explanation, no markdown, no backticks.
 
 Valid genres: ${VALID_GENRES.join(", ")}
 Valid moods: ${VALID_MOODS.join(", ")} (or null)
@@ -38,28 +40,38 @@ Return exactly this shape:
 {"genres": [...], "mood": "..." or null, "era": "...", "min_rating": number}
 
 Rules:
-- genres must be an array of 1-3 items from the valid genres list
+- genres must be an array of 1-3 items from the valid genres list only
 - if the user mentions crying, sadness, emotional → mood: "cry"
-- if the user mentions hype, exciting, intense → mood: "hype"  
+- if the user mentions hype, exciting, intense, fights → mood: "hype"
 - if the user mentions scary, horror, dark → mood: "spooky"
 - if the user mentions relaxing, calm, slice of life → mood: "chill"
 - if the user mentions romance, love → mood: "romance"
-- if the user says "not too old", "recent", "modern" → era: "recent" or "twenty-tens"
-- if the user says "classic", "old school" → era: "classic" or "nineties"
+- if the user says "not too old", "recent", "modern" → era: "recent"
+- if the user says "2010s" → era: "twenty-tens"
+- if the user says "classic", "old school" → era: "classic"
 - if no era preference → era: "any"
-- if the user wants quality → min_rating: 7.5, otherwise default 6.5`,
-      messages: [{ role: "user", content: query }],
+- if the user wants quality or high rated → min_rating: 7.5, otherwise 6.5
+- return ONLY the JSON object, nothing else`,
+        },
+        {
+          role: "user",
+          content: query,
+        },
+      ],
     }),
   });
 
   const data = await response.json();
-  const text = data.content?.[0]?.text ?? "";
+  const text = data.choices?.[0]?.message?.content ?? "";
 
   try {
     const clean = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
     return NextResponse.json(parsed);
   } catch {
-    return NextResponse.json({ error: "Failed to parse Claude response", raw: text }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to parse response", raw: text },
+      { status: 500 }
+    );
   }
 }
