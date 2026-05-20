@@ -126,6 +126,17 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
         {totalAnime.toLocaleString()} titles · AI-powered
       </motion.div>
 
+      <button
+       onClick={() => {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        }
+      }}
+      className="fixed top-4 right-4 z-50 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md text-white"
+    >
+  Enter Fullscreen
+    </button>
+
       {/* Title with parallax */}
       <motion.div
         style={{ y: titleY, opacity: titleOpacity }}
