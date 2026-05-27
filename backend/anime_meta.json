@@ -40,5 +40,17 @@
     "spooky",
     "chill"
   ],
-  "rating_col": "User Rating"
+  "rating_col": "User Rating",
+  "cluster_labels": {
+    "0": "Animation & Drama",
+    "1": "Animation & Adventure",
+    "2": "Animation & Comedy",
+    "3": "Animation & Comedy",
+    "4": "Animation & Action",
+    "5": "Animation & Action",
+    "6": "Animation & Drama",
+    "7": "Animation & Comedy",
+    "8": "Animation & Action",
+    "9": "Animation & Adventure"
+  }
 }

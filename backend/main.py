@@ -81,6 +81,7 @@ class AnimeResult(BaseModel):
     summary: str | None
     matched_filters: list[str]
     total_filters: int
+    cluster_label: str
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
