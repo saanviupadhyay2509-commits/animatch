@@ -65,19 +65,17 @@ export function AnimeCard({ anime, index }: Props) {
       }}
     >
       {/* Card header */}
-      <div className={`bg-gradient-to-br ${grad} relative flex items-end p-4`}
+      <div
+        className={`bg-gradient-to-br ${grad} relative flex items-end p-4`}
         style={{
           height: hovered ? "120px" : "112px",
           transition: "height 0.4s cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        {/* Filter match badge */}
         <div className="absolute top-3 right-3 flex items-center gap-1 glass rounded-full px-2.5 py-1 text-[10px] font-body font-semibold text-white/80">
           <TrendingUp className="w-3 h-3 text-purple-400" />
           {filtersLabel}
         </div>
-
-        {/* Rank number */}
         <span
           className="font-display font-bold text-white/10 select-none pointer-events-none"
           style={{ fontSize: "4.5rem", lineHeight: 1, position: "absolute", right: "1rem", bottom: "-0.5rem" }}
@@ -91,6 +89,20 @@ export function AnimeCard({ anime, index }: Props) {
         <h3 className="font-display font-bold text-white text-base leading-snug line-clamp-2">
           {anime.title}
         </h3>
+
+        {/* Cluster label */}
+        {anime.cluster_label && (
+          <span
+            className="inline-block text-[10px] px-2 py-0.5 rounded-full font-body font-semibold tracking-wide"
+            style={{
+              background: "rgba(96,165,250,0.1)",
+              border: "1px solid rgba(96,165,250,0.2)",
+              color: "#93c5fd",
+            }}
+          >
+            ◈ {anime.cluster_label}
+          </span>
+        )}
 
         {/* Genre pills */}
         <div className="flex flex-wrap gap-1.5">
@@ -140,7 +152,7 @@ export function AnimeCard({ anime, index }: Props) {
           </div>
         )}
 
-        {/* Expanded content on hover */}
+        {/* Expanded summary on hover */}
         <motion.div
           initial={false}
           animate={{ height: hovered ? "auto" : 0, opacity: hovered ? 1 : 0 }}
