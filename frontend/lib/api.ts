@@ -16,6 +16,7 @@ export interface AnimeResult {
   summary: string | null;
   matched_filters: string[];
   total_filters: number;
+  cluster_label: string;
 }
 
 export interface SiteMeta {
