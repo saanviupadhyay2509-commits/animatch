@@ -41,6 +41,7 @@ Return exactly this shape:
 
 Rules:
 - genres must be an array of 1-3 items from the valid genres list only
+- if the user asks for lower rated, underrated, hidden gems, low rating, or less popular anime, set min_rating between 4.5 and 6.0 instead of the default 6.5.
 - if the user mentions crying, sadness, emotional → mood: "cry"
 - if the user mentions hype, exciting, intense, fights → mood: "hype"
 - if the user mentions scary, horror, dark → mood: "spooky"
