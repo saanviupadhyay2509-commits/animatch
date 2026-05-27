@@ -1,9 +1,19 @@
 "use client";
 
 import { useState } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, SlidersHorizontal, ChevronDown } from "lucide-react";
-import type { RecommendRequest, SiteMeta } from "@/lib/api";
+
+import {
+  Sparkles,
+  SlidersHorizontal,
+  ChevronDown,
+} from "lucide-react";
+
+import type {
+  RecommendRequest,
+  SiteMeta,
+} from "@/lib/api";
 
 const MOOD_ICONS: Record<string, string> = {
   hype: "⚡",
@@ -24,36 +34,41 @@ const ERA_LABELS: Record<string, string> = {
 
 interface Props {
   meta: SiteMeta;
-  onSubmit: (req: RecommendRequest) => void;
+  onSubmit: (req?: RecommendRequest) => void;
   loading: boolean;
+
+  filters: RecommendRequest;
+
+  setFilters: React.Dispatch<
+    React.SetStateAction<RecommendRequest>
+  >;
 }
 
-export function RecommendForm({ meta, onSubmit, loading }: Props) {
-  const [selectedGenres, setSelectedGenres] = useState<string[]>(["Action"]);
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
-  const [selectedEra, setSelectedEra] = useState("any");
-  const [minRating, setMinRating] = useState(6.5);
-  const [showAllGenres, setShowAllGenres] = useState(false);
+export function RecommendForm({
+  meta,
+  onSubmit,
+  loading,
+  filters,
+  setFilters,
+}: Props) {
+  const [showAllGenres, setShowAllGenres] =
+    useState(false);
 
-  const visibleGenres = showAllGenres ? meta.available_genres : meta.available_genres.slice(0, 24);
+  const visibleGenres = showAllGenres
+    ? meta.available_genres
+    : meta.available_genres.slice(0, 24);
 
   function toggleGenre(genre: string) {
-    setSelectedGenres((prev) =>
-      prev.includes(genre)
-        ? prev.filter((g) => g !== genre)
-        : [...prev, genre]
-    );
+    setFilters((prev) => ({
+      ...prev,
+      genres: prev.genres.includes(genre)
+        ? prev.genres.filter((g) => g !== genre)
+        : [...prev.genres, genre],
+    }));
   }
 
   function handleSubmit() {
-    if (selectedGenres.length === 0) return;
-    onSubmit({
-      genres: selectedGenres,
-      min_rating: minRating,
-      era: selectedEra,
-      mood: selectedMood,
-      top_n: 6,
-    });
+    onSubmit(filters);
   }
 
   return (
@@ -69,9 +84,10 @@ export function RecommendForm({ meta, onSubmit, loading }: Props) {
           <label className="block font-display font-semibold text-white/80 text-sm uppercase tracking-widest mb-4">
             <SlidersHorizontal className="inline w-4 h-4 mr-2 text-purple-400" />
             Genres
-            {selectedGenres.length > 0 && (
+
+            {filters.genres.length > 0 && (
               <span className="ml-2 text-purple-400 normal-case font-body">
-                · {selectedGenres.join(", ")}
+                · {filters.genres.join(", ")}
               </span>
             )}
           </label>
@@ -81,7 +97,11 @@ export function RecommendForm({ meta, onSubmit, loading }: Props) {
               <button
                 key={genre}
                 onClick={() => toggleGenre(genre)}
-                className={`genre-pill ${selectedGenres.includes(genre) ? "selected" : ""}`}
+                className={`genre-pill ${
+                  filters.genres.includes(genre)
+                    ? "selected"
+                    : ""
+                }`}
               >
                 {genre}
               </button>
@@ -90,13 +110,22 @@ export function RecommendForm({ meta, onSubmit, loading }: Props) {
 
           {meta.available_genres.length > 24 && (
             <button
-              onClick={() => setShowAllGenres((p) => !p)}
+              onClick={() =>
+                setShowAllGenres((p) => !p)
+              }
               className="mt-3 flex items-center gap-1 text-xs text-white/40 hover:text-white/70 transition-colors font-body"
             >
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${showAllGenres ? "rotate-180" : ""}`}
+                className={`w-4 h-4 transition-transform ${
+                  showAllGenres ? "rotate-180" : ""
+                }`}
               />
-              {showAllGenres ? "Show fewer" : `Show ${meta.available_genres.length - 24} more genres`}
+
+              {showAllGenres
+                ? "Show fewer"
+                : `Show ${
+                    meta.available_genres.length - 24
+                  } more genres`}
             </button>
           )}
         </div>
@@ -107,17 +136,38 @@ export function RecommendForm({ meta, onSubmit, loading }: Props) {
         <div>
           <label className="block font-display font-semibold text-white/80 text-sm uppercase tracking-widest mb-4">
             Mood
-            <span className="ml-2 font-body normal-case text-white/30 font-normal">(optional)</span>
+
+            <span className="ml-2 font-body normal-case text-white/30 font-normal">
+              (optional)
+            </span>
           </label>
+
           <div className="flex flex-wrap gap-3">
             {meta.moods.map((mood) => (
               <button
                 key={mood}
-                onClick={() => setSelectedMood((p) => (p === mood ? null : mood))}
-                className={`mood-chip ${selectedMood === mood ? "selected" : ""}`}
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    mood:
+                      prev.mood === mood
+                        ? ""
+                        : mood,
+                  }))
+                }
+                className={`mood-chip ${
+                  filters.mood === mood
+                    ? "selected"
+                    : ""
+                }`}
               >
-                <span className="text-xl">{MOOD_ICONS[mood] ?? "✨"}</span>
-                <span className="font-body capitalize font-medium">{mood}</span>
+                <span className="text-xl">
+                  {MOOD_ICONS[mood] ?? "✨"}
+                </span>
+
+                <span className="font-body capitalize font-medium">
+                  {mood}
+                </span>
               </button>
             ))}
           </div>
@@ -125,49 +175,71 @@ export function RecommendForm({ meta, onSubmit, loading }: Props) {
 
         <div className="w-full h-px bg-white/5" />
 
-        {/* Era + Rating in a grid */}
+        {/* Era + Rating */}
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Era */}
           <div>
             <label className="block font-display font-semibold text-white/80 text-sm uppercase tracking-widest mb-4">
               Era
             </label>
+
             <div className="relative">
               <select
-                value={selectedEra}
-                onChange={(e) => setSelectedEra(e.target.value)}
-                className="w-full appearance-none glass rounded-xl px-4 py-3 font-body text-sm text-white/80 outline-none cursor-pointer
-                  border border-white/10 hover:border-purple-500/40 transition-colors focus:border-purple-500/60"
+                value={filters.era}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    era: e.target.value,
+                  }))
+                }
+                className="w-full appearance-none glass rounded-xl px-4 py-3 font-body text-sm text-white/80 outline-none cursor-pointer border border-white/10 hover:border-purple-500/40 transition-colors focus:border-purple-500/60"
               >
                 {meta.eras.map((era) => (
-                  <option key={era} value={era} className="bg-[#16162a]">
+                  <option
+                    key={era}
+                    value={era}
+                    className="bg-[#16162a]"
+                  >
                     {ERA_LABELS[era] ?? era}
                   </option>
                 ))}
               </select>
+
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
             </div>
           </div>
 
-          {/* Min rating */}
+          {/* Rating */}
           <div>
             <label className="flex items-center justify-between font-display font-semibold text-white/80 text-sm uppercase tracking-widest mb-4">
               Min Rating
+
               <span className="font-body normal-case text-purple-300 font-semibold text-base">
-                {minRating.toFixed(1)} / 10
+                {filters.min_rating.toFixed(1)} / 10
               </span>
             </label>
+
             <input
               type="range"
               min={meta.min_rating}
               max={9.5}
               step={0.5}
-              value={minRating}
-              onChange={(e) => setMinRating(parseFloat(e.target.value))}
+              value={filters.min_rating}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  min_rating: parseFloat(
+                    e.target.value
+                  ),
+                }))
+              }
               className="mt-3"
             />
+
             <div className="flex justify-between text-xs text-white/25 font-body mt-1">
-              <span>{meta.min_rating.toFixed(1)}</span>
+              <span>
+                {meta.min_rating.toFixed(1)}
+              </span>
+
               <span>9.5</span>
             </div>
           </div>
@@ -176,9 +248,8 @@ export function RecommendForm({ meta, onSubmit, loading }: Props) {
         {/* Submit */}
         <motion.button
           onClick={handleSubmit}
-          disabled={loading || selectedGenres.length === 0}
-          className="btn-glow w-full py-4 rounded-xl font-display font-bold text-white text-base
-            disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
+          disabled={loading}
+          className="btn-glow w-full py-4 rounded-xl font-display font-bold text-white text-base disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
           whileTap={{ scale: 0.98 }}
         >
           <AnimatePresence mode="wait">
@@ -190,13 +261,6 @@ export function RecommendForm({ meta, onSubmit, loading }: Props) {
                 exit={{ opacity: 0 }}
                 className="flex items-center gap-3"
               >
-                <svg
-                  className="animate-spin w-5 h-5 text-white/70"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="60" strokeDashoffset="20" />
-                </svg>
                 Finding your anime…
               </motion.div>
             ) : (
