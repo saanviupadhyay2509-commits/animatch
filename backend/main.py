@@ -82,6 +82,7 @@ class AnimeResult(BaseModel):
     matched_filters: list[str]
     total_filters: int
     cluster_label: str
+    predicted_rating: float
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
