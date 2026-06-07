@@ -1,39 +1,35 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Syne } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const syne = Syne({
-  subsets: ["latin"],
-  variable: "--font-display",
-  weight: ["400", "600", "700", "800"],
-});
-
-const grotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-body",
-  weight: ["300", "400", "500", "600"],
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "AniMatch — AI Anime Recommendations",
-  description:
-    "Discover your next obsession. Content-based AI recommendations powered by genre, mood, and era.",
-  openGraph: {
-    title: "AniMatch",
-    description: "AI-powered anime recommendations",
-    type: "website",
-  },
+  title: "animatch",
+  description: "anime recommendations. no bullshit.",
+  authors: [{ name: "developer" }],
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en" className={`${syne.variable} ${grotesk.variable}`}>
-      <body className="bg-[#080810] text-white antialiased font-body">
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} ${mono.variable} antialiased`}>
         {children}
+        {/* Developer signature in console */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            console.log("%c╔════════════════════════════════════╗", "color: #e04f5f");
+            console.log("%c║         anīmātch v1.0              ║", "color: #e04f5f");
+            console.log("%c║    built by hand, not AI           ║", "color: #e04f5f");
+            console.log("%c╚════════════════════════════════════╝", "color: #e04f5f");
+            console.log("%c11,314 anime | 15 clusters | TF-IDF + K-Means", "color: #5b7c99");
+          `
+        }} />
       </body>
     </html>
   );
