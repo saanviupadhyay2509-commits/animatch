@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 export function Hero({ totalAnime }: { totalAnime: number }) {
   const [typed, setTyped] = useState("");
@@ -15,41 +16,77 @@ export function Hero({ totalAnime }: { totalAnime: number }) {
       } else {
         clearInterval(timer);
       }
-    }, 80);
+    }, 75);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <section className="relative px-6 pt-32 pb-20 text-center">
-      <div className="max-w-3xl mx-auto">
-        {/* ASCII border - very human */}
-        <pre className="text-[#e04f5f]/30 text-xs mb-6 font-mono select-none">
-{`┌────────────────────────────────────────┐
-│                                          │`}
-        </pre>
+    <section className="relative px-6 pt-32 pb-24 text-center overflow-hidden">
 
-        <h1 className="text-6xl md:text-7xl font-black tracking-tighter mb-4">
-          <span className="bg-gradient-to-r from-[#e04f5f] to-[#5b7c99] bg-clip-text text-transparent">
-            ani
+      {/* Subtle ambient — not overdone */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse at center top, rgba(224,82,99,0.08) 0%, transparent 70%)",
+        }}
+      />
+
+      <div className="relative max-w-2xl mx-auto">
+
+        {/* Eyebrow */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 mb-8 px-3 py-1.5 rounded-full"
+          style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#e05263] animate-pulse" />
+          <span className="font-mono text-[10px] tracking-widest uppercase text-white/35">
+            {totalAnime.toLocaleString()} titles indexed
           </span>
-          <span className="text-white">match</span>
-        </h1>
+        </motion.div>
 
-        {/* Terminal-style subtitle */}
-        <div className="font-mono text-sm text-white/40 mb-8">
-          <span className="text-[#e04f5f]">$</span> {typed}
-          <span className="animate-pulse">_</span>
-        </div>
+        {/* Main title */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="font-bold tracking-tighter mb-5"
+          style={{ fontSize: "clamp(3.5rem, 10vw, 6.5rem)", lineHeight: 0.95, letterSpacing: "-0.04em" }}
+        >
+          <span style={{ color: "#e05263" }}>ani</span>
+          <span style={{ color: "#e2e2e8" }}>match</span>
+        </motion.h1>
 
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-mono">
-          <span className="w-2 h-2 rounded-full bg-[#e04f5f] animate-pulse" />
-          {totalAnime.toLocaleString()} titles indexed
-        </div>
+        {/* Terminal line */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="font-mono text-sm mb-10"
+          style={{ color: "rgba(255,255,255,0.25)" }}
+        >
+          <span style={{ color: "#4a7fa5" }}>$</span>
+          {" "}{typed}
+          <span className="animate-pulse" style={{ color: "#e05263" }}>_</span>
+        </motion.div>
 
-        <pre className="text-[#e04f5f]/20 text-xs mt-8 font-mono select-none">
-{`│                                          │
-└────────────────────────────────────────┘`}
-        </pre>
+        {/* Scroll hint */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4, duration: 0.6 }}
+          className="flex flex-col items-center gap-2"
+        >
+          <span className="font-mono text-[10px] tracking-widest uppercase text-white/15">configure below</span>
+          <motion.div
+            className="w-px h-8"
+            style={{ background: "linear-gradient(to bottom, rgba(224,82,99,0.4), transparent)" }}
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        </motion.div>
       </div>
     </section>
   );
