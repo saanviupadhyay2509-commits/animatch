@@ -8,7 +8,7 @@ import type { AnimeResult } from "@/lib/api";
 function getAccent(title: string): string {
   let hash = 0;
   for (let i = 0; i < title.length; i++) hash = title.charCodeAt(i) + ((hash << 5) - hash);
-  const colors = ["#e05263", "#4a7fa5", "#b36b8a", "#5a8f7b", "#7c6af7"];
+  const colors = ["#c9a55a", "#d4868a", "#8b9d6e", "#7a8fa8", "#b87a5a"];
   return colors[Math.abs(hash) % colors.length];
 }
 
@@ -29,35 +29,46 @@ export function AnimeCard({ anime, index }: Props) {
 
   return (
     <motion.article
-      className="glass glass-hover rounded-xl overflow-hidden cursor-pointer"
+      className="glass glass-hover rounded-xl overflow-hidden cursor-pointer relative"
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.5, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
     >
       {/* Top accent line */}
-      <div className="h-[2px]" style={{ background: accent }} />
+      <div className="h-[2px]" style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }} />
 
-      <div className="p-5 space-y-3">
+      {/* Subtle inner glow on hover */}
+      {hovered && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: `radial-gradient(ellipse at top left, ${accent}08 0%, transparent 60%)` }}
+        />
+      )}
 
-        {/* Rank + meta row */}
+      <div className="relative p-5 space-y-3">
+
+        {/* Rank + meta */}
         <div className="flex items-start justify-between">
           <span
-            className="font-mono font-black select-none"
-            style={{ fontSize: "2.2rem", lineHeight: 1, color: "rgba(255,255,255,0.04)" }}
+            className="font-display font-bold select-none"
+            style={{ fontSize: "2.5rem", lineHeight: 1, color: "rgba(201,165,90,0.06)" }}
           >
             {String(index + 2).padStart(2, "0")}
           </span>
-          <div className="flex items-center gap-2 text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>
-            <span>{matchedCount}/{totalCount} matched</span>
-            <span>·</span>
+          <div className="flex items-center gap-2 font-mono text-[10px]" style={{ color: "rgba(232,221,208,0.28)" }}>
+            <span>{matchedCount}/{totalCount}</span>
+            <span style={{ color: "rgba(201,165,90,0.3)" }}>·</span>
             <span>{anime.era}</span>
           </div>
         </div>
 
         {/* Title */}
-        <h3 className="font-bold text-white text-[0.95rem] leading-tight line-clamp-2">
+        <h3
+          className="font-display font-bold leading-tight line-clamp-2"
+          style={{ fontSize: "0.95rem", color: "#e8ddd0" }}
+        >
           {anime.title}
         </h3>
 
@@ -66,13 +77,13 @@ export function AnimeCard({ anime, index }: Props) {
           <span
             className="inline-block font-mono text-[9px] px-2 py-0.5 rounded"
             style={{
-              background: `${accent}12`,
-              border: `1px solid ${accent}28`,
+              background: `${accent}10`,
+              border: `1px solid ${accent}25`,
               color: accent,
-              letterSpacing: "0.04em",
+              letterSpacing: "0.05em",
             }}
           >
-            {anime.cluster_label}
+            ◈ {anime.cluster_label}
           </span>
         )}
 
@@ -83,10 +94,11 @@ export function AnimeCard({ anime, index }: Props) {
               key={g}
               className="font-mono text-[9px] px-2 py-0.5 rounded"
               style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "rgba(255,255,255,0.4)",
-                letterSpacing: "0.03em",
+                background: "rgba(201,165,90,0.05)",
+                border: "1px solid rgba(201,165,90,0.12)",
+                color: "rgba(232,221,208,0.4)",
+                letterSpacing: "0.04em",
+                textTransform: "lowercase",
               }}
             >
               {g.toLowerCase()}
@@ -94,41 +106,39 @@ export function AnimeCard({ anime, index }: Props) {
           ))}
         </div>
 
-        {/* Stats row */}
-        <div className="flex items-center gap-4" style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.72rem" }}>
+        {/* Stats */}
+        <div className="flex items-center gap-4 font-mono text-[11px]" style={{ color: "rgba(232,221,208,0.32)" }}>
           {anime.rating > 0 && (
-            <span className="flex items-center gap-1 font-mono">
+            <span className="flex items-center gap-1">
               <Star className="w-3 h-3" style={{ fill: accent, stroke: accent }} />
-              {anime.rating.toFixed(1)}
+              <span style={{ color: "rgba(232,221,208,0.65)" }}>{anime.rating.toFixed(1)}</span>
             </span>
           )}
           {anime.year && (
-            <span className="flex items-center gap-1 font-mono">
+            <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               {anime.year}
             </span>
           )}
-          {anime.votes && (
-            <span className="font-mono">{formatVotes(anime.votes)} votes</span>
-          )}
+          {anime.votes && <span>{formatVotes(anime.votes)}</span>}
         </div>
 
         {/* Matched filters */}
         {anime.matched_filters?.length > 0 && (
-          <div className="flex flex-wrap gap-1 pt-0.5">
+          <div className="flex flex-wrap gap-1">
             {anime.matched_filters.map(f => (
               <span
                 key={f}
                 className="font-mono text-[9px] px-1.5 py-0.5 rounded"
-                style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.3)" }}
+                style={{ background: "rgba(201,165,90,0.07)", color: "rgba(201,165,90,0.55)", border: "1px solid rgba(201,165,90,0.12)" }}
               >
-                +{f}
+                ✓ {f}
               </span>
             ))}
           </div>
         )}
 
-        {/* Summary — shown on hover */}
+        {/* Summary on hover */}
         <motion.div
           initial={false}
           animate={{ height: hovered ? "auto" : 0, opacity: hovered ? 1 : 0 }}
@@ -136,7 +146,10 @@ export function AnimeCard({ anime, index }: Props) {
           style={{ overflow: "hidden" }}
         >
           {anime.summary && (
-            <p className="text-[11px] leading-relaxed pt-1 pb-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+            <p
+              className="text-[11px] leading-relaxed pt-1 pb-0.5 font-body"
+              style={{ color: "rgba(232,221,208,0.32)" }}
+            >
               {anime.summary}
             </p>
           )}
@@ -147,11 +160,11 @@ export function AnimeCard({ anime, index }: Props) {
           href={`https://myanimelist.net/search/all?q=${encodeURIComponent(anime.title)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 font-mono text-[10px] transition-colors duration-200 pt-1"
-          style={{ color: hovered ? accent : "rgba(255,255,255,0.2)" }}
+          className="inline-flex items-center gap-1.5 font-mono text-[10px] transition-all duration-200 pt-1"
+          style={{ color: hovered ? accent : "rgba(232,221,208,0.18)" }}
         >
           <ExternalLink className="w-3 h-3" />
-          myanimelist
+          view on myanimelist
         </a>
       </div>
     </motion.article>

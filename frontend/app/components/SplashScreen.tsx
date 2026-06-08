@@ -2,9 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 
-interface Props {
-  visible: boolean;
-}
+interface Props { visible: boolean; }
 
 export function SplashScreen({ visible }: Props) {
   return (
@@ -12,94 +10,63 @@ export function SplashScreen({ visible }: Props) {
       {visible && (
         <motion.div
           className="fixed inset-0 z-50 flex flex-col items-center justify-center"
-          style={{ background: "#04040d" }}
+          style={{ background: "#12100e" }}
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
         >
-          {/* Ambient glow behind logo */}
-          <div
-            style={{
-              position: "absolute",
-              width: "400px",
-              height: "400px",
-              borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(124,106,247,0.35), transparent 70%)",
-              filter: "blur(60px)",
-              pointerEvents: "none",
-            }}
-          />
+          {/* Warm glow */}
+          <div style={{
+            position: "absolute",
+            width: "400px", height: "400px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(201,165,90,0.18), transparent 70%)",
+            filter: "blur(60px)",
+            pointerEvents: "none",
+          }} />
 
-          {/* Logo mark — stylised A in a circle */}
+          {/* Torii silhouette */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            style={{ position: "relative", marginBottom: "28px" }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            style={{ marginBottom: "28px", position: "relative" }}
           >
-            {/* Outer ring */}
-            <motion.div
-              style={{
-                width: "90px",
-                height: "90px",
-                borderRadius: "50%",
-                border: "1px solid rgba(124,106,247,0.4)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "rgba(124,106,247,0.08)",
-                boxShadow: "0 0 40px rgba(124,106,247,0.25), inset 0 1px 0 rgba(255,255,255,0.08)",
-              }}
-              animate={{ boxShadow: ["0 0 40px rgba(124,106,247,0.25)", "0 0 70px rgba(124,106,247,0.45)", "0 0 40px rgba(124,106,247,0.25)"] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              {/* A glyph */}
-              <span
-                style={{
-                  fontFamily: "var(--font-display), sans-serif",
-                  fontSize: "2.8rem",
-                  fontWeight: 700,
-                  lineHeight: 1,
-                  background: "linear-gradient(160deg, #ffffff 0%, #c4b5fd 40%, #818cf8 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  letterSpacing: "-0.03em",
-                }}
-              >
-                A
-              </span>
-            </motion.div>
+            <svg width="80" height="80" viewBox="0 0 340 340" fill="none">
+              <path d="M20 80 Q170 55 320 80" stroke="#c9a55a" strokeWidth="18" strokeLinecap="round" fill="none"/>
+              <line x1="60" y1="115" x2="280" y2="115" stroke="#c9a55a" strokeWidth="10" strokeLinecap="round"/>
+              <line x1="95" y1="110" x2="95" y2="320" stroke="#c9a55a" strokeWidth="14" strokeLinecap="round"/>
+              <line x1="245" y1="110" x2="245" y2="320" stroke="#c9a55a" strokeWidth="14" strokeLinecap="round"/>
+              <line x1="72" y1="300" x2="118" y2="300" stroke="#c9a55a" strokeWidth="10" strokeLinecap="round"/>
+              <line x1="222" y1="300" x2="268" y2="300" stroke="#c9a55a" strokeWidth="10" strokeLinecap="round"/>
+              <circle cx="170" cy="97" r="8" fill="#c9a55a"/>
+            </svg>
 
-            {/* Orbiting dot */}
+            {/* Orbiting sakura */}
             <motion.div
               style={{
-                position: "absolute",
-                top: "-4px",
-                left: "50%",
-                width: "7px",
-                height: "7px",
-                borderRadius: "50%",
-                background: "#a78bfa",
-                boxShadow: "0 0 10px #7c6af7",
-                transformOrigin: "50% 49px",
+                position: "absolute", top: "-6px", left: "50%",
+                fontSize: "0.75rem", color: "#d4868a",
+                transformOrigin: "50% 46px",
               }}
               animate={{ rotate: 360 }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            />
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            >
+              ✿
+            </motion.div>
           </motion.div>
 
           {/* Wordmark */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             style={{
-              fontFamily: "var(--font-display), sans-serif",
-              fontSize: "1.8rem",
+              fontFamily: "'Shippori Mincho', serif",
+              fontSize: "2rem",
               fontWeight: 700,
               letterSpacing: "-0.02em",
-              background: "linear-gradient(160deg, #ffffff 0%, #c4b5fd 40%, #818cf8 100%)",
+              background: "linear-gradient(160deg, #f0e0c0 0%, #c9a55a 50%, #96713a 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -108,41 +75,32 @@ export function SplashScreen({ visible }: Props) {
             AniMatch
           </motion.div>
 
-          {/* Tagline */}
+          {/* Japanese subtitle */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
             style={{
-              marginTop: "10px",
-              fontSize: "0.7rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.25)",
-              fontFamily: "var(--font-body), sans-serif",
+              marginTop: "6px",
+              fontFamily: "'Shippori Mincho', serif",
+              fontSize: "0.75rem",
+              letterSpacing: "0.3em",
+              color: "rgba(201,165,90,0.35)",
             }}
           >
-            AI Anime Recommendations
+            アニメ・マッチ
           </motion.p>
 
-          {/* Bottom loading bar */}
+          {/* Loading bar */}
           <motion.div
             style={{
-              position: "absolute",
-              bottom: "48px",
-              width: "120px",
-              height: "1px",
-              background: "rgba(255,255,255,0.08)",
-              borderRadius: "1px",
-              overflow: "hidden",
+              position: "absolute", bottom: "48px",
+              width: "100px", height: "1px",
+              background: "rgba(201,165,90,0.1)", borderRadius: "1px", overflow: "hidden",
             }}
           >
             <motion.div
-              style={{
-                height: "100%",
-                background: "linear-gradient(90deg, #7c6af7, #c084fc)",
-                borderRadius: "1px",
-              }}
+              style={{ height: "100%", background: "linear-gradient(90deg, #c9a55a, #e8c07a)", borderRadius: "1px" }}
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
               transition={{ duration: 1.8, ease: "easeInOut" }}
