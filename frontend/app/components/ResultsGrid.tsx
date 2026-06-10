@@ -11,11 +11,18 @@ function SkeletonCard({ index }: { index: number }) {
     <motion.div className="glass rounded-xl overflow-hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: index * 0.04 }}>
       <div className="h-[2px] skeleton" />
       <div className="p-5 space-y-3">
-        <div className="flex justify-between"><div className="skeleton h-8 w-10 rounded" /><div className="skeleton h-3 w-20 rounded" /></div>
+        <div className="flex justify-between items-start">
+          <div className="skeleton h-8 w-10 rounded" />
+          <div className="skeleton h-3 w-20 rounded" />
+        </div>
         <div className="skeleton h-4 w-3/4 rounded" />
-        <div className="skeleton h-3 w-1/2 rounded" />
-        <div className="flex gap-2"><div className="skeleton h-5 w-12 rounded" /><div className="skeleton h-5 w-16 rounded" /></div>
+        <div className="skeleton h-3 w-1/3 rounded" />
+        <div className="flex gap-2">
+          <div className="skeleton h-4 w-12 rounded" />
+          <div className="skeleton h-4 w-16 rounded" />
+        </div>
         <div className="skeleton h-3 w-full rounded" />
+        <div className="skeleton h-3 w-2/3 rounded" />
       </div>
     </motion.div>
   );
@@ -33,9 +40,10 @@ export function ResultsGrid({ results, loading, error, onRetry }: Props) {
     <section className="max-w-6xl mx-auto px-6 pb-32">
       <AnimatePresence mode="wait">
 
+        {/* Loading */}
         {loading && (
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <p className="font-mono text-[11px] tracking-wide mb-6" style={{ color: "rgba(201,165,90,0.35)" }}>
+            <p className="font-mono text-[11px] tracking-wide mb-6" style={{ color: "rgba(232,184,75,0.4)" }}>
               ✦ searching {(Math.random() * 4000 + 1000).toFixed(0)} titles...
             </p>
             <div className="glass rounded-xl skeleton mb-5" style={{ height: "230px" }} />
@@ -45,6 +53,7 @@ export function ResultsGrid({ results, loading, error, onRetry }: Props) {
           </motion.div>
         )}
 
+        {/* Error */}
         {!loading && error && (
           <motion.div
             key="error"
@@ -53,16 +62,18 @@ export function ResultsGrid({ results, loading, error, onRetry }: Props) {
             exit={{ opacity: 0 }}
             className="glass rounded-xl p-10 text-center max-w-md mx-auto"
           >
-            <AlertCircle className="w-8 h-8 mx-auto mb-4" style={{ color: "#d4868a" }} />
-            <p className="font-display font-bold mb-2" style={{ color: "rgba(232,221,208,0.7)", fontSize: "0.95rem" }}>No results found</p>
-            <p className="font-mono text-xs mb-6" style={{ color: "rgba(232,221,208,0.3)" }}>{error}</p>
+            <AlertCircle className="w-8 h-8 mx-auto mb-4" style={{ color: "#e8829a" }} />
+            <p className="font-display font-bold mb-2" style={{ color: "rgba(242,234,216,0.75)", fontSize: "0.95rem" }}>
+              No results found
+            </p>
+            <p className="font-mono text-xs mb-6" style={{ color: "rgba(242,234,216,0.3)" }}>{error}</p>
             {onRetry && (
               <button
                 onClick={onRetry}
                 className="flex items-center gap-2 mx-auto font-mono text-xs transition-colors"
-                style={{ color: "rgba(201,165,90,0.6)" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#c9a55a")}
-                onMouseLeave={e => (e.currentTarget.style.color = "rgba(201,165,90,0.6)")}
+                style={{ color: "rgba(232,184,75,0.55)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#e8b84b")}
+                onMouseLeave={e => (e.currentTarget.style.color = "rgba(232,184,75,0.55)")}
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 try different filters
@@ -71,29 +82,36 @@ export function ResultsGrid({ results, loading, error, onRetry }: Props) {
           </motion.div>
         )}
 
+        {/* Results */}
         {!loading && results && results.length > 0 && (
           <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
 
-            {/* Header */}
-            <motion.div className="flex items-center gap-3 mb-6" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-              <div className="w-[2px] h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #c9a55a, rgba(201,165,90,0.2))" }} />
+            {/* Section header */}
+            <motion.div
+              className="flex items-center gap-3 mb-6"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="w-[2px] h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #e8b84b, rgba(232,184,75,0.2))" }} />
               <div>
-                <h2 className="font-display font-bold text-lg" style={{ color: "#e8ddd0", letterSpacing: "-0.02em" }}>
+                <h2 className="font-display font-bold text-lg" style={{ color: "#f2ead8", letterSpacing: "-0.02em" }}>
                   Your Recommendations
                 </h2>
-                <p className="font-mono text-[10px] tracking-wide" style={{ color: "rgba(201,165,90,0.4)" }}>
+                <p className="font-mono text-[10px] tracking-wide" style={{ color: "rgba(232,184,75,0.45)" }}>
                   {results.length} titles · ranked by cluster, rating & popularity
                 </p>
               </div>
             </motion.div>
 
+            {/* #1 featured */}
             <FeaturedCard anime={results[0]} />
 
+            {/* Rest */}
             {results.length > 1 && (
               <>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-[2px] h-4 rounded-full" style={{ background: "rgba(201,165,90,0.2)" }} />
-                  <p className="font-mono text-[9px] tracking-widest uppercase" style={{ color: "rgba(201,165,90,0.3)" }}>
+                  <div className="w-[2px] h-4 rounded-full" style={{ background: "rgba(232,184,75,0.25)" }} />
+                  <p className="font-mono text-[9px] tracking-widest uppercase" style={{ color: "rgba(232,184,75,0.35)" }}>
                     more picks for you
                   </p>
                 </div>

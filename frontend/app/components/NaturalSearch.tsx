@@ -7,9 +7,9 @@ interface Props { onSubmit: (req: RecommendRequest) => void; }
 
 const EXAMPLES = [
   "something emotional with beautiful animation",
-  "a cozy romance set in high school",
+  "cozy romance set in high school",
   "dark and mysterious, recent years",
-  "hype action with great story",
+  "hype action with an incredible story",
 ];
 
 export function NaturalSearch({ onSubmit }: Props) {
@@ -48,17 +48,19 @@ export function NaturalSearch({ onSubmit }: Props) {
       <div
         className="rounded-xl p-6 space-y-4"
         style={{
-          background: "rgba(28,24,20,0.7)",
-          border: "1px solid rgba(201,165,90,0.14)",
+          background: "rgba(16,22,36,0.75)",
+          border: "1px solid rgba(232,184,75,0.16)",
           backdropFilter: "blur(20px)",
+          boxShadow: "0 0 40px rgba(232,184,75,0.04)",
         }}
       >
         {/* Header */}
         <div className="flex items-center gap-3">
-          <span className="font-mono text-[9px] tracking-widest uppercase" style={{ color: "rgba(201,165,90,0.6)" }}>
-            ✦ ai search
+          <span className="text-sm" style={{ color: "rgba(232,184,75,0.7)" }}>✦</span>
+          <span className="font-mono text-[9px] tracking-widest uppercase" style={{ color: "rgba(232,184,75,0.55)" }}>
+            ai search
           </span>
-          <div className="flex-1 h-px" style={{ background: "rgba(201,165,90,0.1)" }} />
+          <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(232,184,75,0.15), transparent)" }} />
         </div>
 
         {/* Textarea */}
@@ -71,13 +73,13 @@ export function NaturalSearch({ onSubmit }: Props) {
           className="w-full rounded-lg px-4 py-3 text-sm resize-none focus:outline-none transition-all duration-200 font-body"
           style={{
             background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(201,165,90,0.1)",
-            color: "rgba(232,221,208,0.75)",
-            caretColor: "#c9a55a",
+            border: "1px solid rgba(232,184,75,0.12)",
+            color: "rgba(242,234,216,0.75)",
+            caretColor: "#e8b84b",
             lineHeight: 1.6,
           }}
-          onFocus={e => { e.target.style.borderColor = "rgba(201,165,90,0.3)"; e.target.style.boxShadow = "0 0 0 3px rgba(201,165,90,0.06)"; }}
-          onBlur={e  => { e.target.style.borderColor = "rgba(201,165,90,0.1)"; e.target.style.boxShadow = "none"; }}
+          onFocus={e => { e.target.style.borderColor = "rgba(232,184,75,0.35)"; e.target.style.boxShadow = "0 0 0 3px rgba(232,184,75,0.06)"; }}
+          onBlur={e  => { e.target.style.borderColor = "rgba(232,184,75,0.12)"; e.target.style.boxShadow = "none"; }}
         />
 
         {/* Examples */}
@@ -87,16 +89,16 @@ export function NaturalSearch({ onSubmit }: Props) {
               key={ex}
               onClick={() => setQuery(ex)}
               className="font-mono text-[9px] px-2.5 py-1 rounded transition-all duration-150"
-              style={{ background: "rgba(201,165,90,0.05)", border: "1px solid rgba(201,165,90,0.1)", color: "rgba(201,165,90,0.45)" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "rgba(201,165,90,0.8)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,165,90,0.3)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(201,165,90,0.45)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,165,90,0.1)"; }}
+              style={{ background: "rgba(232,184,75,0.06)", border: "1px solid rgba(232,184,75,0.12)", color: "rgba(232,184,75,0.45)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "rgba(232,184,75,0.9)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,184,75,0.35)"; (e.currentTarget as HTMLElement).style.background = "rgba(232,184,75,0.1)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(232,184,75,0.45)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(232,184,75,0.12)"; (e.currentTarget as HTMLElement).style.background = "rgba(232,184,75,0.06)"; }}
             >
               {ex}
             </button>
           ))}
         </div>
 
-        {error && <p className="font-mono text-[11px]" style={{ color: "#d4868a" }}>{error}</p>}
+        {error && <p className="font-mono text-[11px]" style={{ color: "#e8829a" }}>{error}</p>}
 
         <button
           onClick={handleSearch}
@@ -105,17 +107,20 @@ export function NaturalSearch({ onSubmit }: Props) {
         >
           {loading ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin opacity-60" />
+              <span className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />
               reading your vibe...
             </span>
-          ) : "✦ find with ai"}
+          ) : "✦  find with ai"}
         </button>
       </div>
 
+      {/* Divider */}
       <div className="flex items-center gap-4 mt-5">
-        <div className="flex-1 h-px" style={{ background: "rgba(201,165,90,0.07)" }} />
-        <span className="font-mono text-[9px] tracking-widest uppercase" style={{ color: "rgba(201,165,90,0.25)" }}>or filter manually</span>
-        <div className="flex-1 h-px" style={{ background: "rgba(201,165,90,0.07)" }} />
+        <div className="flex-1 h-px" style={{ background: "rgba(232,184,75,0.08)" }} />
+        <span className="font-mono text-[9px] tracking-widest uppercase" style={{ color: "rgba(232,184,75,0.25)" }}>
+          or filter manually
+        </span>
+        <div className="flex-1 h-px" style={{ background: "rgba(232,184,75,0.08)" }} />
       </div>
     </section>
   );
