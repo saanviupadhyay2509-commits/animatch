@@ -16,16 +16,12 @@ from pydantic import BaseModel, Field
 
 from recommender import get_meta, recommend_anime
 
-# ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="AniMatch API",
     description="Content-based anime recommendation engine (BUSS305 Final Project)",
     version="1.0.0",
 )
 
-# ── CORS ──────────────────────────────────────────────────────────────────────
-# Allow requests from localhost (dev) and your Vercel URL (prod)
-# Replace "https://animatch.vercel.app" with your actual Vercel domain
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -40,12 +36,11 @@ app.add_middleware(
 )
 
 
-# ── Request / Response models ─────────────────────────────────────────────────
 class RecommendRequest(BaseModel):
+    # No min_length — mood-only requests send empty genres list
     genres: list[str] = Field(
-        default=["Action"],
+        default=[],
         description="List of genre strings, e.g. ['Action', 'Fantasy']",
-        min_length=1,
     )
     min_rating: float = Field(
         default=6.0,
@@ -85,31 +80,24 @@ class AnimeResult(BaseModel):
     predicted_rating: float
 
 
-# ── Routes ────────────────────────────────────────────────────────────────────
 @app.get("/", tags=["Health"])
 def root():
-    """Health check — Render pings this to verify the service is alive."""
     return {"status": "ok", "message": "AniMatch API is running 🎌"}
 
 
 @app.get("/meta", tags=["Metadata"])
 def metadata():
-    """
-    Returns genres, moods, eras, and dataset stats.
-    The frontend calls this once on load to populate its dropdown menus.
-    """
     return get_meta()
 
 
 @app.post("/recommend", response_model=list[AnimeResult], tags=["Recommendations"])
 def recommend(req: RecommendRequest):
-    """
-    Main recommendation endpoint.
-
-    Accepts user preferences and returns a ranked list of anime.
-    """
-    if not req.genres:
-        raise HTTPException(status_code=400, detail="Provide at least one genre.")
+    # Allow mood-only requests — genres can be empty
+    if not req.genres and not req.mood:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide at least one genre or a mood."
+        )
 
     results = recommend_anime(
         genres=req.genres,
@@ -122,7 +110,7 @@ def recommend(req: RecommendRequest):
     if not results:
         raise HTTPException(
             status_code=404,
-            detail="No anime found matching your filters. Try lowering the minimum rating or choosing 'any' era.",
+            detail="No anime found. Try lowering the minimum rating or choosing 'any' era.",
         )
 
     return results
