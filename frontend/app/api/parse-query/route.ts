@@ -1,46 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_URL     = "https://api.groq.com/openai/v1/chat/completions";
+
+// Must match exactly what the dataset contains
+const VALID_GENRES = [
+  "Action","Adventure","Animation","Comedy","Crime","Documentary",
+  "Drama","Family","Fantasy","History","Horror","Music","Mystery",
+  "Romance","Sci-Fi","Sport","Thriller",
+];
+
+const MOOD_GENRE_MAP: Record<string, string[]> = {
+  hype    : ["Action", "Adventure", "Sport"],
+  cry     : ["Drama", "Romance", "Family"],
+  romance : ["Romance", "Drama", "Comedy"],
+  spooky  : ["Horror", "Thriller", "Mystery"],
+  chill   : ["Comedy", "Family"],
+};
 
 export async function POST(req: NextRequest) {
   try {
     const { query } = await req.json();
 
     if (!query || typeof query !== "string") {
-      return NextResponse.json(
-        { error: "Missing or invalid 'query' field" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing query" }, { status: 400 });
     }
 
     if (!GROQ_API_KEY) {
-      console.error("Missing GROQ_API_KEY environment variable");
-      return NextResponse.json(
-        { error: "API key not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "API key not configured" }, { status: 500 });
     }
-
-    const prompt = `You are an anime recommendation assistant. Parse the user's request into structured filters.
-
-IMPORTANT RULES:
-1. genres: Extract specific genres mentioned. If NONE mentioned, infer from mood:
-   - "sad", "emotional", "cry" → ["Drama", "Romance"]
-   - "exciting", "action", "fight" → ["Action", "Adventure"]
-   - "scary", "horror", "spooky" → ["Horror", "Thriller"]
-   - "funny", "comedy", "laugh" → ["Comedy"]
-   - "romantic", "love" → ["Romance"]
-   - If still empty → ["Drama"]
-2. mood: Choose from: hype, cry, romance, spooky, chill, or null
-3. era: "classic" (pre-1990), "nineties" (1990-1999), "two-thousands" (2000-2009), "twenty-tens" (2010-2019), "recent" (2020+), or "any"
-4. min_rating: number from 0-10. Default to 6.0
-
-Return ONLY valid JSON. No extra text.
-
-User request: "${query}"
-
-JSON:`;
 
     const response = await fetch(GROQ_URL, {
       method: "POST",
@@ -50,72 +38,90 @@ JSON:`;
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
+        temperature: 0.1,
+        max_tokens: 200,
         messages: [
           {
             role: "system",
-            content: "You are a JSON-only API. Never include explanatory text. Output only valid JSON.",
+            content: "You are a JSON-only API. Output only valid JSON, no markdown, no explanation.",
           },
           {
             role: "user",
-            content: prompt,
+            content: `Parse this anime request into filters. Return ONLY raw JSON.
+
+Valid genres (use exact spelling): ${VALID_GENRES.join(", ")}
+Valid moods: hype, cry, romance, spooky, chill, or null
+Valid eras: any, classic, nineties, two-thousands, twenty-tens, recent
+min_rating: number 0-10, default 6.0
+
+Rules:
+- genres: 1-3 genres from the valid list that match the request. Never empty.
+- mood: map "sad/emotional/cry" → cry, "scary/horror/dark/spooky" → spooky, "exciting/fight/action" → hype, "love/romance" → romance, "calm/relaxing/cozy" → chill
+- era: only set if user mentions a time period, otherwise "any"
+- min_rating: default 6.0, never above 7.0
+- If unsure about genres, pick from the mood's defaults
+
+Request: "${query}"
+
+JSON (exactly this shape):
+{"genres": [...], "mood": "...", "era": "...", "min_rating": 6.0}`,
           },
         ],
-        temperature: 0.1,
-        max_tokens: 200,
       }),
     });
 
     if (!response.ok) {
-      console.error("Groq API error:", response.status);
-      return NextResponse.json(
-        { error: "Failed to parse query", raw: await response.text() },
-        { status: 500 }
-      );
+      throw new Error(`Groq error: ${response.status}`);
     }
 
-    const data = await response.json();
-    let content = data.choices?.[0]?.message?.content || "";
+    const data    = await response.json();
+    let   content = data.choices?.[0]?.message?.content ?? "";
+    content       = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-    // Clean markdown fences
-    content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-
-    let parsed;
+    let parsed: Record<string, unknown>;
     try {
       parsed = JSON.parse(content);
     } catch {
-      console.error("Failed to parse:", content);
-      // Fallback to safe defaults
-      parsed = { genres: ["Drama"], mood: "cry", era: "any", min_rating: 6.0 };
+      // Hard fallback — parse mood from query manually
+      parsed = {};
     }
 
-    // Validate and sanitize
-    const validGenres = Array.isArray(parsed.genres) ? parsed.genres : ["Drama"];
-    const validMood = ["hype", "cry", "romance", "spooky", "chill", null].includes(parsed.mood) 
-      ? parsed.mood 
-      : "cry";
-    const validEra = ["any", "classic", "nineties", "two-thousands", "twenty-tens", "recent"].includes(parsed.era)
-      ? parsed.era
-      : "any";
-    let minRating = typeof parsed.min_rating === "number" ? parsed.min_rating : 6.0;
-    
-    // Cap rating
-    minRating = Math.min(10, Math.max(0, minRating));
-    
-    // If no genres after everything, force Drama
-    if (validGenres.length === 0) {
-      validGenres.push("Drama");
-    }
+    // Detect mood from query text as extra safety net
+    const q = query.toLowerCase();
+    let detectedMood: string | null = null;
+    if (/spook|horror|scar|dark|creep|eerie|ghost|demon/.test(q)) detectedMood = "spooky";
+    else if (/sad|cry|emotion|tear|heartbreak|tragic/.test(q))    detectedMood = "cry";
+    else if (/love|romance|romantic|couple/.test(q))              detectedMood = "romance";
+    else if (/hype|fight|action|excit|intense|battle/.test(q))    detectedMood = "hype";
+    else if (/chill|calm|relax|cozy|slice/.test(q))               detectedMood = "chill";
 
-    return NextResponse.json({
-      genres: validGenres,
-      mood: validMood,
-      era: validEra,
-      min_rating: minRating,
-    });
+    const mood = (
+      typeof parsed.mood === "string" && ["hype","cry","romance","spooky","chill"].includes(parsed.mood)
+        ? parsed.mood
+        : detectedMood
+    ) as string | null;
+
+    // Validate genres — filter to only valid ones
+    let genres: string[] = Array.isArray(parsed.genres)
+      ? (parsed.genres as string[]).filter(g => VALID_GENRES.includes(g))
+      : [];
+
+    // If genres empty, derive from mood
+    if (genres.length === 0 && mood) {
+      genres = MOOD_GENRE_MAP[mood] ?? ["Drama"];
+    }
+    if (genres.length === 0) genres = ["Drama"];
+
+    const validEras  = ["any","classic","nineties","two-thousands","twenty-tens","recent"];
+    const era        = validEras.includes(parsed.era as string) ? (parsed.era as string) : "any";
+    const min_rating = Math.min(Math.max(typeof parsed.min_rating === "number" ? parsed.min_rating : 6.0, 0), 6.5);
+
+    return NextResponse.json({ genres, mood, era, min_rating });
+
   } catch (error) {
-    console.error("Unexpected error:", error);
+    console.error("parse-query error:", error);
     return NextResponse.json(
-      { error: "Internal server error", genres: ["Drama"], mood: "cry", era: "any", min_rating: 6.0 },
+      { genres: ["Drama"], mood: "cry", era: "any", min_rating: 6.0 },
       { status: 500 }
     );
   }
