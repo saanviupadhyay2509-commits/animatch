@@ -1,24 +1,11 @@
-"""
-main.py
-───────
-FastAPI entry point.
-
-Run locally:
-    uvicorn main:app --reload --port 8000
-
-On Render:
-    uvicorn main:app --host 0.0.0.0 --port $PORT
-"""
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-
-from recommender import get_meta, recommend_anime
+from recommender import get_meta, recommend_anime, search_by_title
 
 app = FastAPI(
     title="AniMatch API",
-    description="Content-based anime recommendation engine (BUSS305 Final Project)",
+    description="Content-based anime recommendation engine",
     version="1.0.0",
 )
 
@@ -32,37 +19,23 @@ app.add_middleware(
 
 
 class RecommendRequest(BaseModel):
-    # No min_length — mood-only requests send empty genres list
-    genres: list[str] = Field(
-        default=[],
-        description="List of genre strings, e.g. ['Action', 'Fantasy']",
-    )
-    min_rating: float = Field(
-        default=6.0,
-        ge=0.0,
-        le=10.0,
-        description="Minimum IMDb rating (0–10)",
-    )
-    era: str = Field(
-        default="any",
-        description="Era filter: any | classic | nineties | two-thousands | twenty-tens | recent",
-    )
-    mood: str | None = Field(
-        default=None,
-        description="Mood signal: hype | cry | romance | spooky | chill",
-    )
-    top_n: int = Field(
-        default=6,
-        ge=1,
-        le=20,
-        description="Number of results to return",
-    )
+    genres: list[str] = Field(default=[])
+    min_rating: float = Field(default=6.0, ge=0.0, le=10.0)
+    era: str          = Field(default="any")
+    mood: str | None  = Field(default=None)
+    top_n: int        = Field(default=6, ge=1, le=20)
+
+
+class TitleSearchRequest(BaseModel):
+    query: str
+    top_n: int = Field(default=6, ge=1, le=20)
 
 
 class AnimeResult(BaseModel):
     title: str
     genre: str
     rating: float
+    predicted_rating: float
     year: int | None
     votes: int | None
     era: str
@@ -72,7 +45,7 @@ class AnimeResult(BaseModel):
     matched_filters: list[str]
     total_filters: int
     cluster_label: str
-    predicted_rating: float
+    is_title_match: bool = False
 
 
 @app.get("/", tags=["Health"])
@@ -87,12 +60,8 @@ def metadata():
 
 @app.post("/recommend", response_model=list[AnimeResult], tags=["Recommendations"])
 def recommend(req: RecommendRequest):
-    # Allow mood-only requests — genres can be empty
     if not req.genres and not req.mood:
-        raise HTTPException(
-            status_code=400,
-            detail="Provide at least one genre or a mood."
-        )
+        raise HTTPException(status_code=400, detail="Provide at least one genre or a mood.")
 
     results = recommend_anime(
         genres=req.genres,
@@ -103,9 +72,16 @@ def recommend(req: RecommendRequest):
     )
 
     if not results:
-        raise HTTPException(
-            status_code=404,
-            detail="No anime found. Try lowering the minimum rating or choosing 'any' era.",
-        )
+        raise HTTPException(status_code=404, detail="No anime found. Try different filters.")
+
+    return results
+
+
+@app.post("/search", response_model=list[AnimeResult], tags=["Title Search"])
+def title_search(req: TitleSearchRequest):
+    results = search_by_title(req.query, top_n=req.top_n)
+
+    if not results:
+        raise HTTPException(status_code=404, detail=f"No anime found matching '{req.query}'.")
 
     return results
