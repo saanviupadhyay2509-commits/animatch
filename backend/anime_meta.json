@@ -42,15 +42,15 @@
   ],
   "rating_col": "User Rating",
   "cluster_labels": {
-    "0": "Animation & Drama",
-    "1": "Animation & Adventure",
-    "2": "Animation & Comedy",
-    "3": "Animation & Comedy",
-    "4": "Animation & Action",
-    "5": "Animation & Action",
-    "6": "Animation & Drama",
-    "7": "Animation & Comedy",
-    "8": "Animation & Action",
-    "9": "Animation & Adventure"
+    "0": "Animation & Action",
+    "1": "Adventure & Animation",
+    "2": "Animation & Action",
+    "3": "Animation & Adventure",
+    "4": "Animation & Adventure",
+    "5": "Animation & Comedy",
+    "6": "Animation & Comedy",
+    "7": "Animation & Action",
+    "8": "Animation & Romance",
+    "9": "Animation & Comedy"
   }
 }
