@@ -15,10 +15,10 @@ interface Props {
 
 const EXAMPLES = [
   "Naruto",
+  "One Piece",
   "something emotional with great fights",
   "cozy romance, high school setting",
   "dark and spooky, recent",
-  "Death Note",
 ];
 
 export function NaturalSearch({ onSubmit, setResults, setLoading, setError, scrollToResults }: Props) {
