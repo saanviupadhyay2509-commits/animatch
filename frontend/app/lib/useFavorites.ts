@@ -1,49 +1,72 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useSyncExternalStore, useCallback } from "react";
 import type { AnimeResult } from "@/lib/api";
 
 const STORAGE_KEY = "animatch:favorites";
 
+let favorites: AnimeResult[] = [];
+let hydrated = false;
+const subscribers = new Set<() => void>();
+
+function load() {
+  if (hydrated) return;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) favorites = JSON.parse(raw);
+  } catch {
+    // ignore corrupted storage
+  }
+  hydrated = true;
+}
+
+function persist() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
+  } catch {
+    // storage unavailable, ignore
+  }
+}
+
+function notify() {
+  subscribers.forEach(fn => fn());
+}
+
+function subscribe(callback: () => void) {
+  subscribers.add(callback);
+  return () => subscribers.delete(callback);
+}
+
+function getSnapshot() {
+  load();
+  return favorites;
+}
+
+function getServerSnapshot() {
+  return [] as AnimeResult[];
+}
+
 export function useFavorites() {
-  const [favorites, setFavorites] = useState<AnimeResult[]>([]);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setFavorites(JSON.parse(raw));
-    } catch {
-      // ignore corrupted storage
-    }
-    setLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
-    } catch {
-      // storage unavailable, ignore
-    }
-  }, [favorites, loaded]);
+  const favs = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const isFavorite = useCallback(
-    (title: string) => favorites.some(f => f.title === title),
-    [favorites]
+    (title: string) => favs.some(f => f.title === title),
+    [favs]
   );
 
   const toggleFavorite = useCallback((anime: AnimeResult) => {
-    setFavorites(prev =>
-      prev.some(f => f.title === anime.title)
-        ? prev.filter(f => f.title !== anime.title)
-        : [...prev, anime]
-    );
+    favorites = favorites.some(f => f.title === anime.title)
+      ? favorites.filter(f => f.title !== anime.title)
+      : [...favorites, anime];
+    persist();
+    notify();
   }, []);
 
   const removeFavorite = useCallback((title: string) => {
-    setFavorites(prev => prev.filter(f => f.title !== title));
+    favorites = favorites.filter(f => f.title !== title);
+    persist();
+    notify();
   }, []);
 
-  return { favorites, isFavorite, toggleFavorite, removeFavorite, loaded };
+  return { favorites: favs, isFavorite, toggleFavorite, removeFavorite, loaded: hydrated };
 }
