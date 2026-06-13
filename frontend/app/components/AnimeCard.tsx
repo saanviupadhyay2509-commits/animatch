@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { AnimeResult } from "@/lib/api";
 import { genreClass } from "../lib/genreColors";
 import { useFavorites } from "../lib/useFavorites";
+import { birdSay } from "../lib/birdBus";
 
 function getAccent(title: string): string {
   let hash = 0;
@@ -66,7 +67,12 @@ export function AnimeCard({ anime, index }: Props) {
             <span style={{ color: "rgba(232,184,75,0.3)" }}>·</span>
             <span>{anime.era}</span>
             <button
-              onClick={(e) => { e.stopPropagation(); toggleFavorite(anime); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                const willFavorite = !favorited;
+                toggleFavorite(anime);
+                birdSay(willFavorite ? "favorite_add" : "favorite_remove");
+              }}
               className="ml-1 transition-transform duration-150 hover:scale-125"
               aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
             >

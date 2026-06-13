@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { AnimeResult, RecommendRequest } from "@/lib/api";
+import { birdSay } from "../lib/birdBus";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -53,12 +54,14 @@ export function NaturalSearch({ onSubmit, setResults, setLoading, setError, scro
         if (res.ok) {
           const data = await res.json();
           setResults(data);
+          birdSay("title_search");
           setLoading(false);
           return;
         }
 
         if (res.status === 404) {
           setError(`"${query.trim()}" wasn't found in the database. Try the AI description search instead — e.g. "something emotional with great fights".`);
+          birdSay("no_results");
           setLoading(false);
           return;
         }

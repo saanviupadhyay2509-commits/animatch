@@ -5,6 +5,7 @@ import { Star, Calendar, Users, ExternalLink, Heart } from "lucide-react";
 import type { AnimeResult } from "@/lib/api";
 import { genreClass } from "../lib/genreColors";
 import { useFavorites } from "../lib/useFavorites";
+import { birdSay } from "../lib/birdBus";
 
 function getAccent(title: string): string {
   let hash = 0;
@@ -71,7 +72,11 @@ export function FeaturedCard({ anime }: { anime: AnimeResult }) {
             {matchedCount}/{totalCount} matched
           </span>
           <button
-            onClick={() => toggleFavorite(anime)}
+            onClick={() => {
+              const willFavorite = !favorited;
+              toggleFavorite(anime);
+              birdSay(willFavorite ? "favorite_add" : "favorite_remove");
+            }}
             className="ml-auto transition-transform duration-150 hover:scale-125"
             aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
           >

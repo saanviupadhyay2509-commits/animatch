@@ -14,6 +14,7 @@ import { SplashScreen }  from "./components/SplashScreen";
 import { NaturalSearch } from "./components/NaturalSearch";
 import { FavoritesPanel } from "./components/FavoritesPanel";
 import { FriendlyBird } from "./components/FriendlyBird";
+import { birdSay } from "./lib/birdBus";
 import { useFavorites }   from "./lib/useFavorites";
 import { Heart } from "lucide-react";
 
@@ -25,7 +26,6 @@ export function ClientPage({ meta }: Props) {
   const [error, setError]     = useState<string | null>(null);
   const [splash, setSplash]   = useState(true);
   const [favOpen, setFavOpen] = useState(false);
-  const [birdTrigger, setBirdTrigger] = useState(0);
   const { favorites } = useFavorites();
 
   const [filters, setFilters] = useState<RecommendRequest>({
@@ -55,9 +55,19 @@ export function ClientPage({ meta }: Props) {
     try {
       const data = await fetchRecommendations(finalReq);
       setResults(data);
-      setBirdTrigger(prev => prev + 1);
+
+      // React to what the user searched for
+      if (finalReq.mood === "spooky") birdSay("mood_spooky");
+      else if (finalReq.mood === "cry") birdSay("mood_cry");
+      else if (finalReq.mood === "hype") birdSay("mood_hype");
+      else if (finalReq.genres?.some(g => g.toLowerCase() === "horror")) birdSay("genre_horror");
+      else if (finalReq.genres?.some(g => g.toLowerCase() === "romance")) birdSay("genre_romance");
+      else if (finalReq.genres?.some(g => g.toLowerCase() === "comedy")) birdSay("genre_comedy");
+      else if (finalReq.genres?.some(g => g.toLowerCase() === "action")) birdSay("genre_action");
+      else birdSay("results");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+      birdSay("no_results");
     } finally {
       setLoading(false);
     }
@@ -88,7 +98,7 @@ export function ClientPage({ meta }: Props) {
       </button>
 
       <FavoritesPanel open={favOpen} onClose={() => setFavOpen(false)} />
-      <FriendlyBird trigger={birdTrigger} />
+      <FriendlyBird />
 
       <NaturalSearch
         onSubmit={(parsed) => { setFilters(parsed); handleSubmit(parsed); }}
