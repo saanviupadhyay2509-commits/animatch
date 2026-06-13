@@ -32,6 +32,26 @@ export function NaturalSearch({ onSubmit, setResults, setLoading, setError, scro
     return wordCount <= 4 && !descriptive.test(lower);
   }
 
+  const SURPRISE_GENRES = [
+    ["Action", "Fantasy"], ["Romance", "Comedy"], ["Horror", "Mystery"],
+    ["Sci-Fi", "Adventure"], ["Drama", "Slice of Life"], ["Sport", "Drama"],
+    ["Mystery", "Thriller"], ["Fantasy", "Adventure"],
+  ];
+
+  function handleSurpriseMe() {
+    setError(null);
+    setResults([]);
+    scrollToResults();
+    const pick = SURPRISE_GENRES[Math.floor(Math.random() * SURPRISE_GENRES.length)];
+    onSubmit({
+      genres: pick,
+      mood: null,
+      era: "any",
+      min_rating: 6.5,
+      top_n: 6,
+    });
+  }
+
   async function handleSearch() {
     if (!query.trim()) return;
 
@@ -146,18 +166,36 @@ export function NaturalSearch({ onSubmit, setResults, setLoading, setError, scro
           ))}
         </div>
 
-        <button
-          onClick={handleSearch}
-          disabled={localLoad || !query.trim()}
-          className="w-full py-2.5 rounded-lg text-sm font-mono font-semibold transition-all duration-200 btn-glow disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          {localLoad ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />
-              searching...
-            </span>
-          ) : "✦  search"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleSearch}
+            disabled={localLoad || !query.trim()}
+            className="flex-1 py-2.5 rounded-lg text-sm font-mono font-semibold transition-all duration-200 btn-glow disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            {localLoad ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />
+                searching...
+              </span>
+            ) : "✦  search"}
+          </button>
+
+          <button
+            onClick={handleSurpriseMe}
+            disabled={localLoad}
+            title="Get a random recommendation"
+            className="px-4 py-2.5 rounded-lg text-sm font-mono transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{
+              background: "rgba(232,184,75,0.06)",
+              border: "1px solid rgba(232,184,75,0.18)",
+              color: "rgba(232,184,75,0.7)",
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(232,184,75,0.12)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(232,184,75,0.06)"; }}
+          >
+            🎲 surprise me
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 mt-5">

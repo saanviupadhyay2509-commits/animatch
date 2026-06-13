@@ -106,10 +106,37 @@ export function FeaturedCard({ anime }: { anime: AnimeResult }) {
 
         {/* Summary */}
         {anime.summary && (
-          <p className="font-body text-sm leading-relaxed mb-5" style={{ color: "rgba(242,234,216,0.4)", maxWidth: "500px" }}>
+          <p className="font-body text-sm leading-relaxed mb-4" style={{ color: "rgba(242,234,216,0.4)", maxWidth: "500px" }}>
             {anime.summary.length > 155 ? anime.summary.slice(0, 155) + "…" : anime.summary}
           </p>
         )}
+
+        {/* Why this pick — explainability panel */}
+        <div
+          className="mb-5 rounded-lg px-4 py-3"
+          style={{
+            background: "rgba(232,184,75,0.05)",
+            border: "1px solid rgba(232,184,75,0.14)",
+            maxWidth: "500px",
+          }}
+        >
+          <p className="font-mono text-[9px] tracking-widest uppercase mb-2" style={{ color: "rgba(232,184,75,0.55)" }}>
+            ◈ why this pick
+          </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[11px]" style={{ color: "rgba(242,234,216,0.5)" }}>
+            <span>
+              <span style={{ color: accent }}>{Math.round(anime.similarity * 100)}%</span> genre similarity
+            </span>
+            <span>
+              predicted score <span style={{ color: accent }}>{anime.predicted_rating.toFixed(1)}</span>/10
+            </span>
+            {anime.matched_filters?.length > 0 && (
+              <span>
+                matched <span style={{ color: accent }}>{anime.matched_filters.join(", ")}</span>
+              </span>
+            )}
+          </div>
+        </div>
 
         {/* Bottom row */}
         <div className="flex flex-wrap items-center gap-5">
