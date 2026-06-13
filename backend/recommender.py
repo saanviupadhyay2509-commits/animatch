@@ -42,9 +42,18 @@ MOOD_MAP = {
     "chill"   : ["comedy", "slice of life", "family"],
 }
 
+MOOD_TERMS = {
+    "cry"    : ["sad", "emotional", "tragic", "loss", "heartbreak", "tears"],
+    "romance": ["love", "romance", "couple", "relationship"],
+    "hype"   : ["fight", "battle", "power", "hero", "tournament", "war"],
+    "spooky" : ["horror", "death", "ghost", "demon", "curse", "killer", "murder"],
+    "chill"  : ["calm", "friendship", "school", "daily", "slice of life"],
+}
+
 TITLE_COL = "Title" if "Title" in df.columns else "primaryTitle"
 df["_title_lower"] = df[TITLE_COL].astype(str).str.lower().str.strip()
 df["_genre_lower"] = df["Genre"].astype(str).str.lower()
+df["_summary_lower"] = df["Summary"].astype(str).str.lower() if "Summary" in df.columns else ""
 
 
 def _predict_ratings(indices):
@@ -117,9 +126,11 @@ def recommend_anime(genres=None, min_rating=6.0, era="any", mood=None, top_n=6):
     genres     = genres or []
     min_rating = min(min_rating, 6.5)
 
+    # Mood-only queries: derive genres from mood so genre filtering has something to work with
     if not genres and mood:
         genres = [g.title() for g in MOOD_MAP.get(mood.lower(), [])]
 
+    # --- Build TF-IDF query vector ---
     query_parts = [g.lower() for g in genres]
     if era and era != "any":
         query_parts.append(era)
@@ -131,22 +142,31 @@ def recommend_anime(genres=None, min_rating=6.0, era="any", mood=None, top_n=6):
 
     query_cluster = int(kmeans.predict(query_vec)[0])
 
-    base_mask    = pd.Series([True] * len(df), index=df.index)
-    base_mask   &= df[RATING_COL].fillna(0) >= min_rating
-    era_mask     = base_mask.copy()
+    # --- Build candidate masks ---
+    base_mask = pd.Series([True] * len(df), index=df.index)
+    base_mask &= df[RATING_COL].fillna(0) >= min_rating
+
+    era_mask = base_mask.copy()
     if era and era != "any" and "era" in df.columns:
         era_mask &= df["era"] == era
+
     cluster_mask = df["cluster"] == query_cluster
 
     # Genre overlap mask -- anime must share at least one requested genre.
-    # Without this, K-Means can route unrelated queries into the same
+    # Prevents K-Means from routing unrelated queries into the same
     # dominant cluster (e.g. Animation & Comedy) regardless of genre intent.
     if genres:
         genre_set  = [g.lower() for g in genres]
-        genre_mask = df["_genre_lower"].apply(lambda g: any(gen in g for gen in genre_set))
+        genre_overlap_count = df["_genre_lower"].apply(
+            lambda g: sum(1 for gen in genre_set if gen in g)
+        )
+        genre_mask = genre_overlap_count > 0
     else:
+        genre_set = []
+        genre_overlap_count = pd.Series(0, index=df.index)
         genre_mask = pd.Series([True] * len(df), index=df.index)
 
+    # Cascading fallback -- always returns results, prioritising genre relevance
     cluster_indices = None
     for mask in [era_mask & cluster_mask & genre_mask,
                  base_mask & cluster_mask & genre_mask,
@@ -163,16 +183,45 @@ def recommend_anime(genres=None, min_rating=6.0, era="any", mood=None, top_n=6):
     if cluster_indices is None:
         cluster_indices = df.index
 
-    cos_sim      = cosine_similarity(query_vec, tfidf_matrix[cluster_indices]).flatten()
+    # --- Cosine similarity within candidate pool ---
+    cos_sim = cosine_similarity(query_vec, tfidf_matrix[cluster_indices]).flatten()
+
+    # --- Ridge predicted rating ---
     pred_ratings = _predict_ratings(cluster_indices)
     pred_norm    = pred_ratings / 10.0
-    rating_vals  = np.nan_to_num(df.loc[cluster_indices, "rating_norm"].values)
-    pop_vals     = np.nan_to_num(df.loc[cluster_indices, "popularity"].values)
 
-    scores = (0.45 * cos_sim
-            + 0.25 * pred_norm
-            + 0.20 * rating_vals
-            + 0.10 * pop_vals)
+    # --- Normalized rating / popularity ---
+    rating_vals = np.nan_to_num(df.loc[cluster_indices, "rating_norm"].values)
+    pop_vals    = np.nan_to_num(df.loc[cluster_indices, "popularity"].values)
+
+    # --- Genre overlap bonus: rewards matching MORE of the requested genres,
+    #     not just any single one. Normalised by number of genres requested. ---
+    if genres:
+        overlap = genre_overlap_count.loc[cluster_indices].values
+        genre_overlap_bonus = overlap / max(len(genres), 1)
+        genre_overlap_bonus = np.clip(genre_overlap_bonus, 0, 1)
+    else:
+        genre_overlap_bonus = np.zeros(len(cluster_indices))
+
+    # --- Mood bonus from plot summary keywords ---
+    mood_bonus = np.zeros(len(cluster_indices))
+    if mood and mood.lower() in MOOD_TERMS:
+        terms = MOOD_TERMS[mood.lower()]
+        summaries = df.loc[cluster_indices, "_summary_lower"].values
+        for i, s in enumerate(summaries):
+            if any(t in s for t in terms):
+                mood_bonus[i] = 1.0
+
+    # --- Final hybrid score ---
+    # Genre overlap and cosine similarity together drive relevance (60%),
+    # predicted rating + normalized rating give a quality signal (35%),
+    # popularity contributes a small tiebreaker (5%).
+    scores = (0.30 * cos_sim
+            + 0.25 * genre_overlap_bonus
+            + 0.20 * pred_norm
+            + 0.15 * rating_vals
+            + 0.05 * mood_bonus
+            + 0.05 * pop_vals)
 
     top_local  = np.argsort(scores)[::-1][: top_n * 4]
     top_global = cluster_indices.to_numpy()[top_local]
