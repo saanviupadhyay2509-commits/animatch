@@ -66,14 +66,6 @@ export function FeaturedCard({ anime }: { anime: AnimeResult }) {
           <span className="font-mono text-[10px]" style={{ color: "rgba(242,234,216,0.28)" }}>
             {matchedCount}/{totalCount} matched
           </span>
-          {anime.cluster_label && (
-            <span
-              className="font-mono text-[9px] px-2 py-0.5 rounded"
-              style={{ background: "rgba(232,184,75,0.08)", border: "1px solid rgba(232,184,75,0.18)", color: "rgba(232,184,75,0.65)" }}
-            >
-              ◈ {anime.cluster_label}
-            </span>
-          )}
         </div>
 
         {/* Title */}

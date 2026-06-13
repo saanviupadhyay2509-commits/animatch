@@ -72,21 +72,6 @@ export function AnimeCard({ anime, index }: Props) {
           {anime.title}
         </h3>
 
-        {/* Cluster label */}
-        {anime.cluster_label && (
-          <span
-            className="inline-block font-mono text-[9px] px-2 py-0.5 rounded"
-            style={{
-              background: `${accent}14`,
-              border: `1px solid ${accent}30`,
-              color: accent,
-              letterSpacing: "0.05em",
-            }}
-          >
-            ◈ {anime.cluster_label}
-          </span>
-        )}
-
         {/* Genre pills */}
         <div className="flex flex-wrap gap-1.5">
           {anime.genre.split(",").slice(0, 3).map(g => g.trim()).filter(Boolean).map(g => (
