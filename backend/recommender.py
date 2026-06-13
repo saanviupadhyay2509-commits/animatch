@@ -53,6 +53,23 @@ MOOD_TERMS = {
 TITLE_COL = "Title" if "Title" in df.columns else "primaryTitle"
 df["_title_lower"] = df[TITLE_COL].astype(str).str.lower().str.strip()
 df["_genre_lower"] = df["Genre"].astype(str).str.lower()
+
+# English title -> Japanese/romanized title as stored in this IMDb dataset.
+# This dataset uses original Japanese romanized titles for many series.
+TITLE_ALIASES = {
+    "attack on titan"   : "shingeki no kyojin",
+    "demon slayer"      : "kimetsu no yaiba",
+    "jujutsu kaisen"    : "jujutsu kaisen",
+    "jujutsu"           : "jujutsu kaisen",
+    "my hero academia"  : "boku no hero academia",
+    "spy x family"      : "spy x family",
+    "one punch man"     : "one punch man",
+    "sword art online"  : "sword art online",
+    "fullmetal alchemist": "hagane no renkinjutsushi",
+    "haikyu"            : "haikyuu",
+    "tokyo revengers"   : "tokyo revengers",
+    "chainsaw man"      : "chainsaw man",
+}
 if "Summary" in df.columns:
     df["_summary_lower"] = df["Summary"].fillna("").astype(str).str.lower()
 else:
@@ -89,6 +106,11 @@ def _build_result(row, match_score, similarity, predicted_rating,
 def search_by_title(title_query: str, top_n: int = 6) -> list[dict]:
     """Find closest matching anime by title, fill rest with similar anime by genre."""
     q = title_query.lower().strip()
+
+    # Check alias map for popular English titles stored under
+    # Japanese/romanized names in this dataset
+    if q in TITLE_ALIASES:
+        q = TITLE_ALIASES[q]
 
     # 1. Exact match
     exact = df[df["_title_lower"] == q]
