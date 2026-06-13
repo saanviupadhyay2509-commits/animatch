@@ -215,16 +215,17 @@ def recommend_anime(genres=None, min_rating=6.0, era="any", mood=None, top_n=6):
             if any(t in s for t in terms):
                 mood_bonus[i] = 1.0
 
+    # Cluster match bonus -- rewards anime actually in the predicted cluster,
+    # so genre overlap alone can't override correct cluster placement
+    cluster_match_bonus = (df.loc[cluster_indices, "cluster"] == query_cluster).astype(float).values
+
     # --- Final hybrid score ---
-    # Genre overlap and cosine similarity together drive relevance (60%),
-    # predicted rating + normalized rating give a quality signal (35%),
-    # popularity contributes a small tiebreaker (5%).
-    scores = (0.30 * cos_sim
-            + 0.25 * genre_overlap_bonus
-            + 0.20 * pred_norm
-            + 0.15 * rating_vals
-            + 0.05 * mood_bonus
-            + 0.05 * pop_vals)
+    scores = (0.35 * cos_sim
+            + 0.20 * cluster_match_bonus
+            + 0.15 * genre_overlap_bonus
+            + 0.15 * pred_norm
+            + 0.10 * rating_vals
+            + 0.05 * mood_bonus)
 
     top_local  = np.argsort(scores)[::-1][: top_n * 4]
     top_global = cluster_indices.to_numpy()[top_local]
