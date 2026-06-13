@@ -53,7 +53,10 @@ MOOD_TERMS = {
 TITLE_COL = "Title" if "Title" in df.columns else "primaryTitle"
 df["_title_lower"] = df[TITLE_COL].astype(str).str.lower().str.strip()
 df["_genre_lower"] = df["Genre"].astype(str).str.lower()
-df["_summary_lower"] = df["Summary"].astype(str).str.lower() if "Summary" in df.columns else ""
+if "Summary" in df.columns:
+    df["_summary_lower"] = df["Summary"].fillna("").astype(str).str.lower()
+else:
+    df["_summary_lower"] = ""
 
 
 def _predict_ratings(indices):
