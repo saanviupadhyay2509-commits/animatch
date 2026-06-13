@@ -90,9 +90,30 @@ def search_by_title(title_query: str, top_n: int = 6) -> list[dict]:
     """Find closest matching anime by title, fill rest with similar anime by genre."""
     q = title_query.lower().strip()
 
+    # 1. Exact match
     exact = df[df["_title_lower"] == q]
+
+    # 2. Substring match either direction
     if exact.empty:
         exact = df[df["_title_lower"].str.contains(q, na=False, regex=False)]
+    if exact.empty:
+        exact = df[df["_title_lower"].apply(lambda t: t in q and len(t) > 2)]
+
+    # 3. Word-overlap fuzzy match -- handles "demon slayer" vs "Demon Slayer: Kimetsu no Yaiba"
+    if exact.empty:
+        q_words = set(w for w in q.split() if len(w) > 2)
+        if q_words:
+            overlap = df["_title_lower"].apply(
+                lambda t: len(q_words & set(w for w in t.split() if len(w) > 2))
+            )
+            best = overlap[overlap > 0]
+            if not best.empty:
+                # require at least half the query words to match
+                threshold = max(1, len(q_words) // 2)
+                candidates = best[best >= threshold]
+                if not candidates.empty:
+                    exact = df.loc[candidates.sort_values(ascending=False).index]
+
     if exact.empty:
         return []
 
