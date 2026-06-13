@@ -71,7 +71,7 @@ export function FeaturedCard({ anime }: { anime: AnimeResult }) {
             {matchedCount}/{totalCount} matched
           </span>
           <button
-            onClick={() => toggleFavorite(anime.title)}
+            onClick={() => toggleFavorite(anime)}
             className="ml-auto transition-transform duration-150 hover:scale-125"
             aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
           >

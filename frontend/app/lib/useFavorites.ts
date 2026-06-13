@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import type { AnimeResult } from "@/lib/api";
 
 const STORAGE_KEY = "animatch:favorites";
 
 export function useFavorites() {
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<AnimeResult[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -28,15 +29,21 @@ export function useFavorites() {
   }, [favorites, loaded]);
 
   const isFavorite = useCallback(
-    (title: string) => favorites.includes(title),
+    (title: string) => favorites.some(f => f.title === title),
     [favorites]
   );
 
-  const toggleFavorite = useCallback((title: string) => {
+  const toggleFavorite = useCallback((anime: AnimeResult) => {
     setFavorites(prev =>
-      prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]
+      prev.some(f => f.title === anime.title)
+        ? prev.filter(f => f.title !== anime.title)
+        : [...prev, anime]
     );
   }, []);
 
-  return { favorites, isFavorite, toggleFavorite, loaded };
+  const removeFavorite = useCallback((title: string) => {
+    setFavorites(prev => prev.filter(f => f.title !== title));
+  }, []);
+
+  return { favorites, isFavorite, toggleFavorite, removeFavorite, loaded };
 }

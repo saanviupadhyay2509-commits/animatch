@@ -66,7 +66,7 @@ export function AnimeCard({ anime, index }: Props) {
             <span style={{ color: "rgba(232,184,75,0.3)" }}>·</span>
             <span>{anime.era}</span>
             <button
-              onClick={(e) => { e.stopPropagation(); toggleFavorite(anime.title); }}
+              onClick={(e) => { e.stopPropagation(); toggleFavorite(anime); }}
               className="ml-1 transition-transform duration-150 hover:scale-125"
               aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
             >
