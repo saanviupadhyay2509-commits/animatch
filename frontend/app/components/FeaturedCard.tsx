@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, Calendar, Users, ExternalLink } from "lucide-react";
+import { Star, Calendar, Users, ExternalLink, Heart } from "lucide-react";
 import type { AnimeResult } from "@/lib/api";
 import { genreClass } from "../lib/genreColors";
+import { useFavorites } from "../lib/useFavorites";
 
 function getAccent(title: string): string {
   let hash = 0;
@@ -21,6 +22,8 @@ function formatVotes(v: number | null): string {
 
 export function FeaturedCard({ anime }: { anime: AnimeResult }) {
   const accent = getAccent(anime.title);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorited = isFavorite(anime.title);
   const matchedCount = anime.matched_filters?.length ?? 0;
   const totalCount   = anime.total_filters   ?? 0;
 
@@ -67,6 +70,19 @@ export function FeaturedCard({ anime }: { anime: AnimeResult }) {
           <span className="font-mono text-[10px]" style={{ color: "rgba(242,234,216,0.28)" }}>
             {matchedCount}/{totalCount} matched
           </span>
+          <button
+            onClick={() => toggleFavorite(anime.title)}
+            className="ml-auto transition-transform duration-150 hover:scale-125"
+            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Heart
+              className="w-4 h-4"
+              style={{
+                fill: favorited ? "#e8829a" : "transparent",
+                stroke: favorited ? "#e8829a" : "rgba(242,234,216,0.35)",
+              }}
+            />
+          </button>
         </div>
 
         {/* Title */}

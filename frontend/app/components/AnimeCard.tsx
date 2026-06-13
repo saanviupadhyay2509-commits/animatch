@@ -1,10 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, Calendar, ExternalLink } from "lucide-react";
+import { Star, Calendar, ExternalLink, Heart } from "lucide-react";
 import { useState } from "react";
 import type { AnimeResult } from "@/lib/api";
 import { genreClass } from "../lib/genreColors";
+import { useFavorites } from "../lib/useFavorites";
 
 function getAccent(title: string): string {
   let hash = 0;
@@ -24,6 +25,8 @@ interface Props { anime: AnimeResult; index: number; }
 
 export function AnimeCard({ anime, index }: Props) {
   const [hovered, setHovered] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorited = isFavorite(anime.title);
   const accent = getAccent(anime.title);
   const matchedCount = anime.matched_filters?.length ?? 0;
   const totalCount   = anime.total_filters   ?? 0;
@@ -62,6 +65,19 @@ export function AnimeCard({ anime, index }: Props) {
             <span style={{ color: accent, opacity: 0.8 }}>{matchedCount}/{totalCount}</span>
             <span style={{ color: "rgba(232,184,75,0.3)" }}>·</span>
             <span>{anime.era}</span>
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleFavorite(anime.title); }}
+              className="ml-1 transition-transform duration-150 hover:scale-125"
+              aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+            >
+              <Heart
+                className="w-3.5 h-3.5"
+                style={{
+                  fill: favorited ? "#e8829a" : "transparent",
+                  stroke: favorited ? "#e8829a" : "rgba(242,234,216,0.3)",
+                }}
+              />
+            </button>
           </div>
         </div>
 
