@@ -56,7 +56,13 @@ export function NaturalSearch({ onSubmit, setResults, setLoading, setError, scro
           setLoading(false);
           return;
         }
-        // 404 = not found, fall through to AI description search
+
+        if (res.status === 404) {
+          setError(`"${query.trim()}" wasn't found in the database. Try the AI description search instead — e.g. "something emotional with great fights".`);
+          setLoading(false);
+          return;
+        }
+        // other errors fall through to AI description search
       }
 
       // AI description search path
