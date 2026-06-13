@@ -32,7 +32,7 @@ if RATING_COL not in df.columns:
             RATING_COL = candidate
             break
 
-print(f"✅ Loaded {len(df):,} anime | rating col: '{RATING_COL}'")
+print(f"Loaded {len(df):,} anime | rating col: '{RATING_COL}'")
 
 MOOD_MAP = {
     "hype"    : ["action", "adventure", "sport"],
@@ -42,9 +42,9 @@ MOOD_MAP = {
     "chill"   : ["comedy", "slice of life", "family"],
 }
 
-# Lowercase title index for fast title search
 TITLE_COL = "Title" if "Title" in df.columns else "primaryTitle"
 df["_title_lower"] = df[TITLE_COL].astype(str).str.lower().str.strip()
+df["_genre_lower"] = df["Genre"].astype(str).str.lower()
 
 
 def _predict_ratings(indices):
@@ -75,23 +75,15 @@ def _build_result(row, match_score, similarity, predicted_rating,
 
 
 def search_by_title(title_query: str, top_n: int = 6) -> list[dict]:
-    """
-    Find the closest matching anime by title, then fill remaining
-    slots with similar recommendations based on that anime's genres.
-    """
+    """Find closest matching anime by title, fill rest with similar anime by genre."""
     q = title_query.lower().strip()
 
-    # 1. Exact match first
     exact = df[df["_title_lower"] == q]
-
-    # 2. Partial match if no exact
     if exact.empty:
         exact = df[df["_title_lower"].str.contains(q, na=False, regex=False)]
-
     if exact.empty:
         return []
 
-    # Best match = highest rated among partial matches
     anchor      = exact.sort_values(RATING_COL, ascending=False).iloc[0]
     anchor_idx  = anchor.name
     anchor_pred = float(_predict_ratings(pd.Index([anchor_idx]))[0])
@@ -109,13 +101,8 @@ def search_by_title(title_query: str, top_n: int = 6) -> list[dict]:
     if top_n <= 1:
         return output
 
-    # Fill remaining slots with similar anime by genre
     anchor_genres = [g.strip() for g in str(anchor.get("Genre", "")).split(",") if g.strip()]
-    similar = recommend_anime(
-        genres=anchor_genres,
-        min_rating=5.0,
-        top_n=top_n + 1,   # +1 because anchor will be filtered out
-    )
+    similar = recommend_anime(genres=anchor_genres, min_rating=5.0, top_n=top_n + 1)
 
     for r in similar:
         if r["title"].lower() != anchor[TITLE_COL].lower():
@@ -151,9 +138,20 @@ def recommend_anime(genres=None, min_rating=6.0, era="any", mood=None, top_n=6):
         era_mask &= df["era"] == era
     cluster_mask = df["cluster"] == query_cluster
 
+    # Genre overlap mask -- anime must share at least one requested genre.
+    # Without this, K-Means can route unrelated queries into the same
+    # dominant cluster (e.g. Animation & Comedy) regardless of genre intent.
+    if genres:
+        genre_set  = [g.lower() for g in genres]
+        genre_mask = df["_genre_lower"].apply(lambda g: any(gen in g for gen in genre_set))
+    else:
+        genre_mask = pd.Series([True] * len(df), index=df.index)
+
     cluster_indices = None
-    for mask in [era_mask & cluster_mask,
-                 base_mask & cluster_mask,
+    for mask in [era_mask & cluster_mask & genre_mask,
+                 base_mask & cluster_mask & genre_mask,
+                 era_mask & genre_mask,
+                 base_mask & genre_mask,
                  era_mask,
                  base_mask,
                  pd.Series([True] * len(df), index=df.index)]:
