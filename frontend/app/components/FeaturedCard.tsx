@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Star, Calendar, Users, ExternalLink } from "lucide-react";
 import type { AnimeResult } from "@/lib/api";
+import { genreClass } from "../lib/genreColors";
 
 function getAccent(title: string): string {
   let hash = 0;
@@ -86,19 +87,10 @@ export function FeaturedCard({ anime }: { anime: AnimeResult }) {
           {anime.title}
         </h2>
 
-        {/* Genres */}
+        {/* Genre type badges */}
         <div className="flex flex-wrap gap-1.5 mb-4">
           {anime.genre.split(",").slice(0, 5).map(g => g.trim()).filter(Boolean).map(g => (
-            <span
-              key={g}
-              className="font-mono text-[9px] px-2 py-0.5 rounded"
-              style={{
-                background: "rgba(232,184,75,0.07)",
-                border: "1px solid rgba(232,184,75,0.15)",
-                color: "rgba(242,234,216,0.45)",
-                letterSpacing: "0.04em",
-              }}
-            >
+            <span key={g} className={`genre-badge ${genreClass(g)}`}>
               {g.toLowerCase()}
             </span>
           ))}
@@ -110,33 +102,6 @@ export function FeaturedCard({ anime }: { anime: AnimeResult }) {
             {anime.summary.length > 155 ? anime.summary.slice(0, 155) + "…" : anime.summary}
           </p>
         )}
-
-        {/* Why this pick — explainability panel */}
-        <div
-          className="mb-5 rounded-lg px-4 py-3"
-          style={{
-            background: "rgba(232,184,75,0.05)",
-            border: "1px solid rgba(232,184,75,0.14)",
-            maxWidth: "500px",
-          }}
-        >
-          <p className="font-mono text-[9px] tracking-widest uppercase mb-2" style={{ color: "rgba(232,184,75,0.55)" }}>
-            ◈ why this pick
-          </p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[11px]" style={{ color: "rgba(242,234,216,0.5)" }}>
-            <span>
-              <span style={{ color: accent }}>{Math.round(anime.similarity * 100)}%</span> genre similarity
-            </span>
-            <span>
-              predicted score <span style={{ color: accent }}>{anime.predicted_rating.toFixed(1)}</span>/10
-            </span>
-            {anime.matched_filters?.length > 0 && (
-              <span>
-                matched <span style={{ color: accent }}>{anime.matched_filters.join(", ")}</span>
-              </span>
-            )}
-          </div>
-        </div>
 
         {/* Bottom row */}
         <div className="flex flex-wrap items-center gap-5">

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Star, Calendar, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import type { AnimeResult } from "@/lib/api";
+import { genreClass } from "../lib/genreColors";
 
 function getAccent(title: string): string {
   let hash = 0;
@@ -72,19 +73,10 @@ export function AnimeCard({ anime, index }: Props) {
           {anime.title}
         </h3>
 
-        {/* Genre pills */}
+        {/* Genre type badges */}
         <div className="flex flex-wrap gap-1.5">
           {anime.genre.split(",").slice(0, 3).map(g => g.trim()).filter(Boolean).map(g => (
-            <span
-              key={g}
-              className="font-mono text-[9px] px-2 py-0.5 rounded"
-              style={{
-                background: "rgba(232,184,75,0.06)",
-                border: "1px solid rgba(232,184,75,0.14)",
-                color: "rgba(242,234,216,0.45)",
-                letterSpacing: "0.04em",
-              }}
-            >
+            <span key={g} className={`genre-badge ${genreClass(g)}`}>
               {g.toLowerCase()}
             </span>
           ))}
