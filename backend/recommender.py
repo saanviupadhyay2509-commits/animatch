@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import difflib
 import joblib
 import numpy as np
 import pandas as pd
@@ -135,6 +136,13 @@ def search_by_title(title_query: str, top_n: int = 6) -> list[dict]:
                 candidates = best[best >= threshold]
                 if not candidates.empty:
                     exact = df.loc[candidates.sort_values(ascending=False).index]
+
+    # 4. Typo tolerance -- fuzzy string matching against all titles
+    if exact.empty:
+        all_titles = df["_title_lower"].tolist()
+        close = difflib.get_close_matches(q, all_titles, n=3, cutoff=0.6)
+        if close:
+            exact = df[df["_title_lower"].isin(close)]
 
     if exact.empty:
         return []
