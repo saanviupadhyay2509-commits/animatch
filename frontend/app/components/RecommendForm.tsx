@@ -9,7 +9,6 @@ const MOOD_ICONS: Record<string, string> = {
   hype: "⚡", cry: "🌧️", romance: "🌸", spooky: "🌑", chill: "☁️",
 };
 
-// Genres each mood auto-selects — must match dataset exactly
 const MOOD_GENRES: Record<string, string[]> = {
   hype    : ["Action", "Adventure", "Sport"],
   cry     : ["Drama", "Romance", "Family"],
@@ -56,14 +55,12 @@ export function RecommendForm({ meta, onSubmit, loading, filters, setFilters }: 
     const isSelected = filters.mood === mood;
 
     if (isSelected) {
-      // Deselect mood — remove its auto-added genres
       setFilters(prev => ({
         ...prev,
         mood: null,
         genres: prev.genres.filter(g => !moodGenres.includes(g)),
       }));
     } else {
-      // Select mood — add its genres if not already present
       setFilters(prev => {
         const prevMoodGenres = MOOD_GENRES[prev.mood ?? ""] ?? [];
         const genresWithoutOldMood = prev.genres.filter(g => !prevMoodGenres.includes(g));
@@ -76,20 +73,25 @@ export function RecommendForm({ meta, onSubmit, loading, filters, setFilters }: 
     }
   }
 
+  const labelCls = "block font-display font-semibold text-sm uppercase tracking-widest mb-1";
+  const labelColor = { color: "rgb(var(--text) / 0.75)" };
+  const divider = { background: "rgb(var(--accent) / 0.1)" };
+
   return (
-    <section className="relative z-10 max-w-4xl mx-auto px-6 pb-24">
+    <section className="relative z-10 max-w-3xl mx-auto px-6">
       <motion.div
-        className="glass rounded-2xl p-8 md:p-10 space-y-8"
+        className="surface rounded-3xl p-8 md:p-10 space-y-8"
         initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.3 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7 }}
       >
 
         {/* ── Mood ── */}
         <div>
-          <label className="block font-display font-semibold text-sm uppercase tracking-widest mb-1" style={{ color: "rgba(242,234,216,0.7)" }}>
+          <label className={labelCls} style={labelColor}>
             Mood
-            <span className="ml-2 font-body normal-case font-normal text-xs" style={{ color: "rgba(242,234,216,0.3)" }}>
+            <span className="ml-2 font-body normal-case font-normal text-xs" style={{ color: "rgb(var(--text) / 0.35)" }}>
               (auto-selects matching genres)
             </span>
           </label>
@@ -107,28 +109,27 @@ export function RecommendForm({ meta, onSubmit, loading, filters, setFilters }: 
             ))}
           </div>
 
-          {/* Show which genres were auto-selected by mood */}
           {filters.mood && MOOD_GENRES[filters.mood] && (
             <motion.p
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               className="font-mono text-[10px] mt-3 tracking-wide"
-              style={{ color: "rgba(232,184,75,0.55)" }}
+              style={{ color: "rgb(var(--accent) / 0.65)" }}
             >
               ✦ auto-selected: {MOOD_GENRES[filters.mood].join(", ")}
             </motion.p>
           )}
         </div>
 
-        <div className="w-full h-px" style={{ background: "rgba(232,184,75,0.08)" }} />
+        <div className="w-full h-px" style={divider} />
 
         {/* ── Genres ── */}
         <div>
-          <label className="block font-display font-semibold text-sm uppercase tracking-widest mb-1" style={{ color: "rgba(242,234,216,0.7)" }}>
-            <SlidersHorizontal className="inline w-4 h-4 mr-2" style={{ color: "rgba(232,184,75,0.6)" }} />
+          <label className={labelCls} style={labelColor}>
+            <SlidersHorizontal className="inline w-4 h-4 mr-2" style={{ color: "rgb(var(--accent) / 0.7)" }} />
             Genres
             {filters.genres.length > 0 && (
-              <span className="ml-2 font-mono normal-case font-normal text-[10px]" style={{ color: "rgba(232,184,75,0.55)" }}>
+              <span className="ml-2 font-mono normal-case font-normal text-[10px]" style={{ color: "rgb(var(--accent) / 0.65)" }}>
                 · {filters.genres.length} selected
               </span>
             )}
@@ -142,7 +143,7 @@ export function RecommendForm({ meta, onSubmit, loading, filters, setFilters }: 
                   key={genre}
                   onClick={() => toggleGenre(genre)}
                   className={`genre-pill ${filters.genres.includes(genre) ? "selected" : ""}`}
-                  style={isMoodGenre ? { boxShadow: "0 0 8px rgba(232,184,75,0.2)" } : {}}
+                  style={isMoodGenre ? { boxShadow: "0 0 10px rgb(var(--accent) / 0.25)" } : {}}
                 >
                   {genre}
                   {isMoodGenre && <span className="ml-1 opacity-60">✦</span>}
@@ -154,10 +155,8 @@ export function RecommendForm({ meta, onSubmit, loading, filters, setFilters }: 
           {meta.available_genres.length > 24 && (
             <button
               onClick={() => setShowAllGenres(p => !p)}
-              className="mt-3 flex items-center gap-1 text-xs transition-colors font-mono"
-              style={{ color: "rgba(242,234,216,0.3)" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "rgba(232,184,75,0.7)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "rgba(242,234,216,0.3)")}
+              className="mt-3 flex items-center gap-1 text-xs transition-colors font-mono hover:brightness-125"
+              style={{ color: "rgb(var(--text) / 0.4)" }}
             >
               <ChevronDown className={`w-4 h-4 transition-transform ${showAllGenres ? "rotate-180" : ""}`} />
               {showAllGenres ? "Show fewer" : `Show ${meta.available_genres.length - 24} more genres`}
@@ -165,39 +164,39 @@ export function RecommendForm({ meta, onSubmit, loading, filters, setFilters }: 
           )}
         </div>
 
-        <div className="w-full h-px" style={{ background: "rgba(232,184,75,0.08)" }} />
+        <div className="w-full h-px" style={divider} />
 
         {/* ── Era + Rating ── */}
         <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <label className="block font-display font-semibold text-sm uppercase tracking-widest mb-4" style={{ color: "rgba(242,234,216,0.7)" }}>
+            <label className="block font-display font-semibold text-sm uppercase tracking-widest mb-4" style={labelColor}>
               Era
             </label>
             <div className="relative">
               <select
                 value={filters.era}
                 onChange={e => setFilters(prev => ({ ...prev, era: e.target.value }))}
-                className="w-full appearance-none glass rounded-xl px-4 py-3 font-mono text-sm outline-none cursor-pointer transition-colors"
+                className="w-full appearance-none rounded-xl px-4 py-3 font-mono text-sm outline-none cursor-pointer transition-colors"
                 style={{
-                  color: "rgba(242,234,216,0.75)",
-                  border: "1px solid rgba(232,184,75,0.14)",
-                  background: "rgba(16,22,36,0.6)",
+                  color: "rgb(var(--text) / 0.8)",
+                  border: "1px solid rgb(var(--accent) / 0.16)",
+                  background: "rgb(var(--surface) / 0.6)",
                 }}
               >
                 {meta.eras.map(era => (
-                  <option key={era} value={era} style={{ background: "#141d2e" }}>
+                  <option key={era} value={era} style={{ background: "#15161f", color: "#e8ecf7" }}>
                     {ERA_LABELS[era] ?? era}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "rgba(232,184,75,0.4)" }} />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "rgb(var(--accent) / 0.5)" }} />
             </div>
           </div>
 
           <div>
-            <label className="flex items-center justify-between font-display font-semibold text-sm uppercase tracking-widest mb-4" style={{ color: "rgba(242,234,216,0.7)" }}>
+            <label className="flex items-center justify-between font-display font-semibold text-sm uppercase tracking-widest mb-4" style={labelColor}>
               Min Rating
-              <span className="font-mono normal-case font-semibold text-base" style={{ color: "#e8b84b" }}>
+              <span className="font-mono normal-case font-semibold text-base" style={{ color: "rgb(var(--accent))" }}>
                 {filters.min_rating.toFixed(1)} / 10
               </span>
             </label>
@@ -210,7 +209,7 @@ export function RecommendForm({ meta, onSubmit, loading, filters, setFilters }: 
               onChange={e => setFilters(prev => ({ ...prev, min_rating: parseFloat(e.target.value) }))}
               className="mt-3"
             />
-            <div className="flex justify-between text-xs font-mono mt-1" style={{ color: "rgba(242,234,216,0.2)" }}>
+            <div className="flex justify-between text-xs font-mono mt-1" style={{ color: "rgb(var(--text) / 0.25)" }}>
               <span>{meta.min_rating.toFixed(1)}</span>
               <span>9.5</span>
             </div>
@@ -221,7 +220,7 @@ export function RecommendForm({ meta, onSubmit, loading, filters, setFilters }: 
         <motion.button
           onClick={() => onSubmit(filters)}
           disabled={loading || (filters.genres.length === 0 && !filters.mood)}
-          className="btn-glow w-full py-4 rounded-xl font-display font-bold text-white text-base disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+          className="btn-glow w-full py-4 rounded-xl font-display font-bold text-base disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3"
           whileTap={{ scale: 0.98 }}
         >
           <AnimatePresence mode="wait">
@@ -239,9 +238,8 @@ export function RecommendForm({ meta, onSubmit, loading, filters, setFilters }: 
           </AnimatePresence>
         </motion.button>
 
-        {/* Hint when nothing selected */}
         {filters.genres.length === 0 && !filters.mood && (
-          <p className="text-center font-mono text-[10px]" style={{ color: "rgba(232,184,75,0.3)", marginTop: "-16px" }}>
+          <p className="text-center font-mono text-[10px]" style={{ color: "rgb(var(--accent) / 0.4)", marginTop: "-16px" }}>
             select a mood or genre to get started
           </p>
         )}

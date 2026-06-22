@@ -9,6 +9,9 @@ let favorites: AnimeResult[] = [];
 let hydrated = false;
 const subscribers = new Set<() => void>();
 
+// Stable reference for SSR so useSyncExternalStore doesn't loop.
+const EMPTY: AnimeResult[] = [];
+
 function load() {
   if (hydrated) return;
   try {
@@ -43,7 +46,7 @@ function getSnapshot() {
 }
 
 function getServerSnapshot() {
-  return [] as AnimeResult[];
+  return EMPTY;
 }
 
 export function useFavorites() {

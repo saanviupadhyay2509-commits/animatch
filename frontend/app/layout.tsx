@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
-
 export const metadata: Metadata = {
-  title: "animatch",
-  description: "anime recommendations. no bullshit.",
-  authors: [{ name: "developer" }],
+  title: "AniMatch — find something good",
+  description: "A content-based anime recommender. Scroll through the spectrum.",
+  authors: [{ name: "Saanvi" }],
 };
 
 export default function RootLayout({
@@ -18,16 +14,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${mono.variable} antialiased`}>
+      <body className="antialiased">
         {children}
-        {/* Developer signature in console */}
+        {/* Console signature for the curious */}
         <script dangerouslySetInnerHTML={{
           __html: `
-            console.log("%c╔════════════════════════════════════╗", "color: #e04f5f");
-            console.log("%c║         anīmātch v1.0              ║", "color: #e04f5f");
-            console.log("%c║    built by hand, not AI           ║", "color: #e04f5f");
-            console.log("%c╚════════════════════════════════════╝", "color: #e04f5f");
-            console.log("%c11,314 anime | 15 clusters | TF-IDF + K-Means", "color: #5b7c99");
+            console.log("%cAniMatch", "font: 700 38px Georgia,serif; color:#b06ef5; text-shadow:0 2px 12px rgba(176,110,245,.4)");
+            console.log("%cliving spectrum · scroll the palette ↓", "color:#6e8efb; font-family:monospace; font-size:12px");
+            console.log("%c11,314 titles · TF-IDF + K-Means · FastAPI + Next.js", "color:#7a8299; font-family:monospace; font-size:11px");
           `
         }} />
       </body>

@@ -6,7 +6,8 @@ import { randomBirdMessage, type BirdMessageKey } from "../lib/birdMessages";
 import { registerBird } from "../lib/birdBus";
 
 export function FriendlyBird() {
-  const [message, setMessage] = useState(randomBirdMessage("idle"));
+  // Deterministic first render so SSR and client markup match; randomised after mount.
+  const [message, setMessage] = useState("hi there~ ✿");
   const [bubbleVisible, setBubbleVisible] = useState(true);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -20,6 +21,8 @@ export function FriendlyBird() {
 
   useEffect(() => {
     registerBird(showMessage);
+    // Pick a fresh greeting only after hydration to avoid a server/client mismatch.
+    setMessage(randomBirdMessage("idle"));
   }, []);
 
   // Occasional idle chatter when nothing else is happening
@@ -42,9 +45,9 @@ export function FriendlyBird() {
             key={message}
             className="rounded-2xl px-3.5 py-2 mb-1 font-mono text-[11px]"
             style={{
-              background: "rgba(16,22,36,0.92)",
-              border: "1px solid rgba(232,184,75,0.22)",
-              color: "rgba(242,234,216,0.8)",
+              background: "rgb(var(--surface) / 0.92)",
+              border: "1px solid rgb(var(--accent) / 0.22)",
+              color: "rgb(var(--text) / 0.85)",
               backdropFilter: "blur(10px)",
               maxWidth: "180px",
             }}
