@@ -37,8 +37,8 @@ function scrollProgress(): number {
 }
 
 export function ThemeEngine({ children }: { children: React.ReactNode }) {
-  const presetIdRef = useRef("aurora");
-  const [presetId, setPresetIdState] = useState("aurora");
+  const presetIdRef = useRef("sakura");
+  const [presetId, setPresetIdState] = useState("sakura");
   const [zone, setZone] = useState("night");
   const frame = useRef<number | null>(null);
 
