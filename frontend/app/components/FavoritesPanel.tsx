@@ -17,21 +17,23 @@ export function FavoritesPanel({ open, onClose }: Props) {
     <AnimatePresence>
       {open && (
         <>
+          {/* Backdrop */}
           <motion.div
             className="fixed inset-0 z-40"
-            style={{ background: "rgb(0 0 0 / 0.55)" }}
+            style={{ background: "rgba(8,12,20,0.6)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
 
+          {/* Panel */}
           <motion.div
             className="fixed top-0 right-0 h-full z-50 flex flex-col"
             style={{
               width: "min(420px, 100vw)",
-              background: "rgb(var(--surface) / 0.97)",
-              borderLeft: "1px solid rgb(var(--accent) / 0.16)",
+              background: "rgba(14,21,32,0.97)",
+              borderLeft: "1px solid rgba(232,184,75,0.16)",
               backdropFilter: "blur(20px)",
             }}
             initial={{ x: "100%" }}
@@ -39,26 +41,28 @@ export function FavoritesPanel({ open, onClose }: Props) {
             exit={{ x: "100%" }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: "1px solid rgb(var(--accent) / 0.12)" }}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: "1px solid rgba(232,184,75,0.1)" }}>
               <div className="flex items-center gap-2">
-                <Heart className="w-4 h-4" style={{ fill: "rgb(var(--accent))", stroke: "rgb(var(--accent))" }} />
-                <h3 className="font-display font-bold text-base" style={{ color: "rgb(var(--text))" }}>
+                <Heart className="w-4 h-4" style={{ fill: "#e8829a", stroke: "#e8829a" }} />
+                <h3 className="font-display font-bold text-base" style={{ color: "#f2ead8" }}>
                   My List
                 </h3>
-                <span className="font-mono text-[10px]" style={{ color: "rgb(var(--accent) / 0.5)" }}>
+                <span className="font-mono text-[10px]" style={{ color: "rgba(232,184,75,0.45)" }}>
                   {favorites.length}
                 </span>
               </div>
               <button onClick={onClose} className="p-1 transition-opacity hover:opacity-60">
-                <X className="w-4 h-4" style={{ color: "rgb(var(--text) / 0.5)" }} />
+                <X className="w-4 h-4" style={{ color: "rgba(242,234,216,0.5)" }} />
               </button>
             </div>
 
+            {/* List */}
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
               {favorites.length === 0 && (
                 <div className="text-center pt-16 px-6">
-                  <Heart className="w-8 h-8 mx-auto mb-3" style={{ color: "rgb(var(--accent) / 0.2)" }} />
-                  <p className="font-mono text-[11px]" style={{ color: "rgb(var(--text) / 0.35)" }}>
+                  <Heart className="w-8 h-8 mx-auto mb-3" style={{ color: "rgba(232,184,75,0.15)" }} />
+                  <p className="font-mono text-[11px]" style={{ color: "rgba(242,234,216,0.3)" }}>
                     Tap the heart on any title to save it here.
                   </p>
                 </div>
@@ -67,11 +71,11 @@ export function FavoritesPanel({ open, onClose }: Props) {
               {favorites.map(anime => (
                 <div
                   key={anime.title}
-                  className="rounded-xl p-3 flex gap-3"
-                  style={{ background: "rgb(var(--text) / 0.03)", border: "1px solid rgb(var(--accent) / 0.1)" }}
+                  className="rounded-lg p-3 flex gap-3"
+                  style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(232,184,75,0.08)" }}
                 >
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-display font-semibold text-sm mb-1 line-clamp-1" style={{ color: "rgb(var(--text))" }}>
+                    <h4 className="font-display font-semibold text-sm mb-1 line-clamp-1" style={{ color: "#f2ead8" }}>
                       {anime.title}
                     </h4>
                     <div className="flex flex-wrap gap-1 mb-1.5">
@@ -79,10 +83,10 @@ export function FavoritesPanel({ open, onClose }: Props) {
                         <span key={g} className={`genre-badge ${genreClass(g)}`}>{g.toLowerCase()}</span>
                       ))}
                     </div>
-                    <div className="flex items-center gap-3 font-mono text-[10px]" style={{ color: "rgb(var(--text) / 0.4)" }}>
+                    <div className="flex items-center gap-3 font-mono text-[10px]" style={{ color: "rgba(242,234,216,0.35)" }}>
                       {anime.rating > 0 && (
                         <span className="flex items-center gap-1">
-                          <Star className="w-3 h-3" style={{ fill: "rgb(var(--accent))", stroke: "rgb(var(--accent))" }} />
+                          <Star className="w-3 h-3" style={{ fill: "#e8b84b", stroke: "#e8b84b" }} />
                           {anime.rating.toFixed(1)}
                         </span>
                       )}
@@ -92,7 +96,7 @@ export function FavoritesPanel({ open, onClose }: Props) {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 transition-opacity hover:opacity-70"
-                        style={{ color: "rgb(var(--accent) / 0.6)" }}
+                        style={{ color: "rgba(232,184,75,0.55)" }}
                       >
                         <ExternalLink className="w-3 h-3" />
                         MAL
@@ -104,7 +108,7 @@ export function FavoritesPanel({ open, onClose }: Props) {
                     className="self-start p-1 transition-opacity hover:opacity-60"
                     aria-label="Remove from list"
                   >
-                    <X className="w-3.5 h-3.5" style={{ color: "rgb(var(--text) / 0.3)" }} />
+                    <X className="w-3.5 h-3.5" style={{ color: "rgba(242,234,216,0.3)" }} />
                   </button>
                 </div>
               ))}
