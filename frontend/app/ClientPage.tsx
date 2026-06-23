@@ -14,11 +14,16 @@ import { SplashScreen }  from "./components/SplashScreen";
 import { NaturalSearch } from "./components/NaturalSearch";
 import { FavoritesPanel } from "./components/FavoritesPanel";
 import { FriendlyBird } from "./components/FriendlyBird";
+import LiquidEther from "./components/LiquidEther";
 import { birdSay } from "./lib/birdBus";
 import { useFavorites }   from "./lib/useFavorites";
 import { Heart } from "lucide-react";
 
 interface Props { meta: SiteMeta; }
+
+// Warm gold → sakura flow that matches the AniMatch palette.
+// Defined at module scope so the array identity is stable across renders.
+const LIQUID_COLORS = ["#8b6f3a", "#c9a55a", "#e8c07a", "#d4868a"];
 
 export function ClientPage({ meta }: Props) {
   const [results, setResults] = useState<AnimeResult[] | null>(null);
@@ -75,7 +80,24 @@ export function ClientPage({ meta }: Props) {
 
   return (
     <>
+      {/* Liquid fluid background — sits behind everything, never blocks clicks */}
+      <div className="fixed inset-0" style={{ zIndex: 0, pointerEvents: "none", opacity: 0.5 }} aria-hidden="true">
+        <LiquidEther
+          colors={LIQUID_COLORS}
+          mouseForce={18}
+          cursorSize={90}
+          resolution={0.5}
+          autoDemo
+          autoSpeed={0.4}
+          autoIntensity={1.9}
+          takeoverDuration={0.25}
+          autoResumeDelay={2500}
+        />
+      </div>
+
       <SplashScreen visible={splash} />
+
+      <div className="relative" style={{ zIndex: 1 }}>
       <Hero totalAnime={meta.total_anime} />
 
       {/* Floating "My List" button */}
@@ -128,6 +150,7 @@ export function ClientPage({ meta }: Props) {
       <footer className="text-center pb-12 text-white/15 text-xs font-body">
         AniMatch · BUSS305 Final Project · Built with FastAPI + Next.js
       </footer>
+      </div>
     </>
   );
 }
