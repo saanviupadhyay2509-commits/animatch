@@ -28,13 +28,13 @@ export function ResultsToolbar({ count, latencyMs, sort, onSortChange }: Props) 
       transition={{ duration: 0.4 }}
     >
       <div className="flex items-center gap-3">
-        <span className="text-xl" style={{ color: "rgb(var(--accent))" }}>✦</span>
+        <div className="w-[3px] h-6 rounded-full" style={{ background: "linear-gradient(to bottom, rgb(var(--accent)), rgb(var(--accent) / 0.2))" }} />
         <div>
-          <h2 className="font-display text-2xl" style={{ color: "rgb(var(--text))" }}>
-            Your summons
+          <h2 className="font-display font-bold text-xl" style={{ color: "rgb(var(--text))", letterSpacing: "-0.02em" }}>
+            Your recommendations
           </h2>
           <p className="font-mono text-[10px] tracking-wide flex items-center gap-2" style={{ color: "rgb(var(--accent) / 0.55)" }}>
-            <span>{count} pulled</span>
+            <span>{count} titles</span>
             {latencyMs != null && (
               <>
                 <span style={{ color: "rgb(var(--accent) / 0.3)" }}>·</span>

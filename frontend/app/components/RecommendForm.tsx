@@ -216,31 +216,31 @@ export function RecommendForm({ meta, onSubmit, loading, filters, setFilters }: 
           </div>
         </div>
 
-        {/* ── Summon ── */}
+        {/* ── Submit ── */}
         <motion.button
           onClick={() => onSubmit(filters)}
           disabled={loading || (filters.genres.length === 0 && !filters.mood)}
-          className="btn-summon w-full py-4 text-lg disabled:cursor-not-allowed flex items-center justify-center gap-3"
-          whileTap={{ scale: 0.97 }}
+          className="btn-glow w-full py-4 rounded-xl font-display font-bold text-base disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+          whileTap={{ scale: 0.98 }}
         >
           <AnimatePresence mode="wait">
             {loading ? (
               <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                Summoning…
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Finding your anime...
               </motion.div>
             ) : (
               <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                Summon ✦
+                Find My Anime
               </motion.div>
             )}
           </AnimatePresence>
         </motion.button>
 
         {filters.genres.length === 0 && !filters.mood && (
-          <p className="text-center font-mono text-[10px]" style={{ color: "rgb(var(--accent) / 0.5)", marginTop: "-16px" }}>
-            pick a mood or genre to charge the summon ✦
+          <p className="text-center font-mono text-[10px]" style={{ color: "rgb(var(--accent) / 0.4)", marginTop: "-16px" }}>
+            select a mood or genre to get started
           </p>
         )}
       </motion.div>

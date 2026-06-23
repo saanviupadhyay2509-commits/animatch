@@ -13,10 +13,7 @@ import { ResultsGrid }   from "./components/ResultsGrid";
 import { SplashScreen }  from "./components/SplashScreen";
 import { NaturalSearch } from "./components/NaturalSearch";
 import { FavoritesPanel } from "./components/FavoritesPanel";
-import { Spirit } from "./components/Spirit";
-import { Atmosphere } from "./components/Atmosphere";
-import { SparkleCursor } from "./components/SparkleCursor";
-import { SummonOverlay } from "./components/SummonOverlay";
+import { FriendlyBird } from "./components/FriendlyBird";
 import { CommandPalette, type Command } from "./components/CommandPalette";
 import { ScrollProgress } from "./components/ScrollProgress";
 import { ThemeEngine } from "./components/ThemeEngine";
@@ -26,8 +23,7 @@ import { type SortKey } from "./components/ResultsToolbar";
 import { birdSay } from "./lib/birdBus";
 import { useFavorites }   from "./lib/useFavorites";
 import { useHotkey, modLabel } from "./lib/useHotkeys";
-import { useSound } from "./lib/useSound";
-import { Sparkles, Command as CommandIcon, Volume2, VolumeX } from "lucide-react";
+import { Heart, Command as CommandIcon } from "lucide-react";
 
 interface Props { meta: SiteMeta; }
 
@@ -44,7 +40,6 @@ export function ClientPage({ meta }: Props) {
   const [sort, setSort]       = useState<SortKey>("match");
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const { favorites } = useFavorites();
-  const { muted, toggle: toggleMute, summon: summonSound } = useSound();
 
   const [filters, setFilters] = useState<RecommendRequest>({
     genres: [], mood: null, era: "any", min_rating: 6.5, top_n: 6,
@@ -76,7 +71,6 @@ export function ClientPage({ meta }: Props) {
 
   const handleSubmit = useCallback(async (req?: RecommendRequest) => {
     const finalReq = req || filters;
-    summonSound();
     setLoading(true);
     setError(null);
     setResults(null);
@@ -86,10 +80,7 @@ export function ClientPage({ meta }: Props) {
     const started = performance.now();
     try {
       const data = await fetchRecommendations(finalReq);
-      const elapsed = performance.now() - started;
-      // let the summon ritual breathe for a beat even on fast responses
-      if (elapsed < 900) await new Promise(r => setTimeout(r, 900 - elapsed));
-      setLatencyMs(Math.max(1, Math.round(elapsed)));
+      setLatencyMs(Math.max(1, Math.round(performance.now() - started)));
       setResults(data);
 
       if (finalReq.mood === "spooky") birdSay("mood_spooky");
@@ -106,7 +97,7 @@ export function ClientPage({ meta }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [filters, scrollToResults, summonSound]);
+  }, [filters, scrollToResults]);
 
   const focusSearch = useCallback(() => {
     const el = document.getElementById("anim-search") as HTMLTextAreaElement | null;
@@ -136,81 +127,79 @@ export function ClientPage({ meta }: Props) {
 
   const commands = useMemo<Command[]>(() => {
     const list: Command[] = [
-      { id: "surprise", group: "Summon", glyph: "🎲", label: "Lucky pull", hint: "random summon", keywords: "random lucky shuffle surprise gacha", run: surprise },
-      { id: "focus-search", group: "Summon", glyph: "🌙", label: "Make a wish", hint: "press /", keywords: "search find query describe vibe", run: focusSearch },
-      { id: "scroll-filters", group: "Summon", glyph: "✦", label: "Open the altar", keywords: "filters genre era rating tune build", run: () => document.getElementById("altar")?.scrollIntoView({ behavior: "smooth", block: "start" }) },
+      { id: "surprise", group: "Discover", glyph: "🎲", label: "Surprise me", hint: "random recommendation", keywords: "random lucky shuffle", run: surprise },
+      { id: "focus-search", group: "Discover", glyph: "🔎", label: "Search by title or vibe", hint: "press /", keywords: "find query describe", run: focusSearch },
+      { id: "scroll-filters", group: "Discover", glyph: "🎛️", label: "Jump to filters", keywords: "genre era rating tune", run: () => document.getElementById("discover")?.scrollIntoView({ behavior: "smooth", block: "start" }) },
     ];
     for (const mood of meta.moods) {
       list.push({
         id: `mood-${mood}`,
         group: "Moods",
         glyph: MOOD_GLYPH[mood] ?? "✨",
-        label: `Summon ${mood}`,
-        hint: "instant pull",
+        label: `I'm feeling ${mood}`,
+        hint: "instant picks",
         keywords: mood,
         run: () => runMood(mood),
       });
     }
     list.push(
-      { id: "open-list", group: "Library", glyph: "✦", label: `Open Collection (${favorites.length})`, hint: "press f", keywords: "favorites saved collection cards", run: () => setFavOpen(true) },
-      { id: "top", group: "Navigate", glyph: "↑", label: "Back to top", keywords: "scroll hero home", run: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
+      { id: "open-list", group: "Library", glyph: "♥", label: `Open My List (${favorites.length})`, hint: "press f", keywords: "favorites saved bookmarks", run: () => setFavOpen(true) },
+      { id: "top", group: "Navigate", glyph: "↑", label: "Back to top", keywords: "scroll hero home night", run: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
     );
     return list;
   }, [meta.moods, favorites.length, surprise, focusSearch, runMood]);
 
   const pillStyle = {
     background: "rgb(var(--surface) / 0.8)",
-    border: "1.5px solid rgb(var(--accent) / 0.25)",
+    border: "1px solid rgb(var(--accent) / 0.2)",
     backdropFilter: "blur(12px)",
   };
 
   return (
     <ThemeEngine>
-      <Atmosphere />
-      <SparkleCursor />
       <ScrollProgress />
       <SplashScreen visible={splash} />
-      <SummonOverlay visible={loading} />
       <ZoneRail />
       <AccentPicker />
 
       {/* Top-right control cluster */}
       <div className="fixed top-5 right-5 z-40 flex items-center gap-2">
-        <button onClick={toggleMute} className="grid place-items-center w-9 h-9 rounded-full transition-all duration-200 hover:brightness-125"
-          style={pillStyle} aria-label={muted ? "Unmute" : "Mute"} title={muted ? "Unmute sounds" : "Mute sounds"}>
-          {muted ? <VolumeX className="w-3.5 h-3.5" style={{ color: "rgb(var(--text) / 0.5)" }} /> : <Volume2 className="w-3.5 h-3.5" style={{ color: "rgb(var(--accent))" }} />}
-        </button>
-
-        <button onClick={() => setPaletteOpen(true)}
+        <button
+          onClick={() => setPaletteOpen(true)}
           className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200 hover:brightness-125"
-          style={pillStyle} aria-label="Open command palette" title="Command palette">
-          <CommandIcon className="w-3.5 h-3.5" style={{ color: "rgb(var(--accent))" }} />
+          style={pillStyle}
+          aria-label="Open command palette"
+          title="Command palette"
+        >
+          <CommandIcon className="w-3.5 h-3.5" style={{ color: "rgb(var(--accent) / 0.85)" }} />
           <span className="font-mono text-[11px]" style={{ color: "rgb(var(--text) / 0.6)" }}>{modLabel()}K</span>
         </button>
 
-        <button onClick={() => setFavOpen(true)}
+        <button
+          onClick={() => setFavOpen(true)}
           className="flex items-center gap-2 px-3.5 py-2 rounded-full transition-all duration-200 hover:brightness-125"
-          style={pillStyle} aria-label="Open collection">
-          <Sparkles className="w-4 h-4" style={{ fill: favorites.length > 0 ? "rgb(var(--accent))" : "transparent", stroke: "rgb(var(--accent))" }} />
+          style={pillStyle}
+        >
+          <Heart className="w-4 h-4" style={{ fill: favorites.length > 0 ? "rgb(var(--accent))" : "transparent", stroke: "rgb(var(--accent))" }} />
           <span className="font-mono text-[11px]" style={{ color: "rgb(var(--text) / 0.6)" }}>{favorites.length}</span>
         </button>
       </div>
 
       <FavoritesPanel open={favOpen} onClose={() => setFavOpen(false)} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
-      <Spirit />
+      <FriendlyBird />
 
       <div className="relative z-10">
         <Hero totalAnime={meta.total_anime} />
 
-        {/* ── Summon altar ── */}
-        <section id="altar" className="pt-6 pb-24">
-          <div className="max-w-3xl mx-auto px-6 mb-8 text-center">
-            <p className="font-pop text-[11px] tracking-[0.3em] uppercase mb-3" style={{ color: "rgb(var(--accent) / 0.75)" }}>
-              ✦ the summon altar ✦
+        {/* ── Discover zone ── */}
+        <section id="discover" className="pt-10 pb-24">
+          <div className="max-w-[1100px] mx-auto px-6 sm:px-10 lg:px-20 mb-10">
+            <p className="font-mono text-[10px] tracking-[0.35em] uppercase mb-3" style={{ color: "rgb(var(--accent) / 0.7)" }}>
+              02 · dusk — tell it what you want
             </p>
-            <h2 className="font-display" style={{ fontSize: "clamp(1.8rem, 5vw, 2.8rem)", color: "rgb(var(--text))" }}>
-              Whisper a wish, or build your pull
+            <h2 className="font-display" style={{ fontSize: "clamp(1.8rem, 5vw, 3rem)", fontWeight: 500, letterSpacing: "-0.03em", color: "rgb(var(--text))" }}>
+              Describe a vibe, or name a favourite.
             </h2>
           </div>
 
@@ -222,16 +211,18 @@ export function ClientPage({ meta }: Props) {
             scrollToResults={scrollToResults}
           />
 
-          <RecommendForm
-            meta={meta}
-            onSubmit={handleSubmit}
-            loading={loading}
-            filters={filters}
-            setFilters={setFilters}
-          />
+          <div data-section="filters">
+            <RecommendForm
+              meta={meta}
+              onSubmit={handleSubmit}
+              loading={loading}
+              filters={filters}
+              setFilters={setFilters}
+            />
+          </div>
         </section>
 
-        {/* ── Summons ── */}
+        {/* ── Results zone ── */}
         <section id="results" ref={resultsRef} className="scroll-mt-8">
           <ResultsGrid
             results={results}
@@ -245,16 +236,17 @@ export function ClientPage({ meta }: Props) {
         </section>
 
         {/* Footer */}
-        <footer className="max-w-3xl mx-auto px-6 pb-16">
-          <div className="h-px mb-6" style={{ background: "linear-gradient(90deg, transparent, rgb(var(--accent) / 0.25), transparent)" }} />
+        <footer className="max-w-[1100px] mx-auto px-6 sm:px-10 lg:px-20 pb-16">
+          <div className="h-px mb-6" style={{ background: "linear-gradient(90deg, transparent, rgb(var(--accent) / 0.18), transparent)" }} />
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="font-mono text-[10px] text-center sm:text-left" style={{ color: "rgb(var(--text) / 0.3)" }}>
-              AniMatch ✦ {meta.total_anime.toLocaleString()} titles ✦ made with TF-IDF, K-Means & love
+              AniMatch · {meta.total_anime.toLocaleString()} titles · TF-IDF + K-Means · FastAPI + Next.js
             </p>
             <div className="flex items-center gap-3 font-mono text-[10px]" style={{ color: "rgb(var(--text) / 0.35)" }}>
-              <span className="flex items-center gap-1.5"><kbd className="kbd">{modLabel()}</kbd><kbd className="kbd">K</kbd></span>
-              <span className="flex items-center gap-1.5"><kbd className="kbd">/</kbd> wish</span>
-              <span className="flex items-center gap-1.5"><kbd className="kbd">R</kbd> lucky</span>
+              <span className="flex items-center gap-1.5"><kbd className="kbd">{modLabel()}</kbd><kbd className="kbd">K</kbd> commands</span>
+              <span className="flex items-center gap-1.5"><kbd className="kbd">/</kbd> search</span>
+              <span className="flex items-center gap-1.5"><kbd className="kbd">F</kbd> list</span>
+              <span className="flex items-center gap-1.5"><kbd className="kbd">R</kbd> random</span>
             </div>
           </div>
         </footer>

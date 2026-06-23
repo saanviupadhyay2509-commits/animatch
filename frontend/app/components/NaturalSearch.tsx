@@ -104,9 +104,9 @@ export function NaturalSearch({ onSubmit, setResults, setLoading, setError, scro
         className="rounded-2xl p-6 space-y-4 surface"
       >
         <div className="flex items-center gap-3">
-          <span className="text-sm" style={{ color: "rgb(var(--accent) / 0.85)" }}>🌙</span>
-          <span className="font-pop text-[10px] tracking-[0.2em] uppercase" style={{ color: "rgb(var(--accent) / 0.7)" }}>
-            make a wish — a title, or a vibe
+          <span className="text-sm" style={{ color: "rgb(var(--accent) / 0.8)" }}>✦</span>
+          <span className="font-mono text-[9px] tracking-widest uppercase" style={{ color: "rgb(var(--accent) / 0.6)" }}>
+            search by title or describe what you want
           </span>
           <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgb(var(--accent) / 0.2), transparent)" }} />
         </div>
@@ -151,16 +151,16 @@ export function NaturalSearch({ onSubmit, setResults, setLoading, setError, scro
           {localLoad ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />
-              wishing...
+              searching...
             </span>
-          ) : "✦  make a wish"}
+          ) : "✦  search"}
         </button>
       </div>
 
       <div className="flex items-center gap-4 mt-6">
         <div className="flex-1 h-px" style={{ background: "rgb(var(--accent) / 0.1)" }} />
         <span className="font-mono text-[9px] tracking-widest uppercase" style={{ color: "rgb(var(--text) / 0.3)" }}>
-          or build your summon
+          or filter manually
         </span>
         <div className="flex-1 h-px" style={{ background: "rgb(var(--accent) / 0.1)" }} />
       </div>

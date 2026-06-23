@@ -3,96 +3,122 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-const WISHES = [
+const VIBES = [
   "something emotional with great fights",
   "cozy romance, high school setting",
-  "dark & spooky, recent",
+  "dark and spooky, recent",
   "a slow-burn mystery that sticks",
-  "peak shounen, gorgeous animation",
+  "hype shounen, peak animation",
 ];
 
 export function Hero({ totalAnime }: { totalAnime: number }) {
-  const [w, setW] = useState(0);
+  const [vibe, setVibe] = useState(0);
+
   useEffect(() => {
-    const t = setInterval(() => setW(v => (v + 1) % WISHES.length), 2600);
+    const t = setInterval(() => setVibe(v => (v + 1) % VIBES.length), 2600);
     return () => clearInterval(t);
   }, []);
 
   return (
-    <section id="hero" className="relative min-h-[100svh] flex flex-col items-center justify-center text-center px-6">
+    <section id="hero" className="relative min-h-[100svh] flex flex-col justify-center px-6 sm:px-10 lg:px-20 max-w-[1100px] mx-auto">
 
-      {/* badge */}
+      {/* Brand row */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-        className="inline-flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full"
-        style={{ background: "rgb(var(--accent) / 0.12)", border: "1.5px solid rgb(var(--accent) / 0.3)" }}
+        className="flex items-center gap-3 mb-10"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
       >
-        <motion.span animate={{ rotate: 360 }} transition={{ duration: 5, repeat: Infinity, ease: "linear" }} style={{ color: "rgb(var(--accent))" }}>✦</motion.span>
-        <span className="font-mono text-[10px] tracking-[0.25em] uppercase" style={{ color: "rgb(var(--accent))" }}>
-          {totalAnime.toLocaleString()} titles · gacha recommender
+        <span className="relative grid place-items-center" style={{ width: 30, height: 30 }}>
+          <motion.span
+            className="absolute inset-0 rounded-full"
+            style={{ background: "conic-gradient(from 0deg, rgb(var(--accent)), rgb(var(--accent-2)), rgb(var(--accent)))" }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          />
+          <span className="absolute rounded-full" style={{ inset: 4, background: "rgb(var(--bg))" }} />
+          <span className="relative w-1.5 h-1.5 rounded-full" style={{ background: "rgb(var(--accent))" }} />
+        </span>
+        <span className="font-mono text-[12px] tracking-[0.35em] uppercase" style={{ color: "rgb(var(--text) / 0.55)" }}>
+          AniMatch
         </span>
       </motion.div>
 
-      {/* katakana whisper */}
-      <motion.p
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 0.8 }}
-        className="font-pop mb-2 tracking-[0.5em]" style={{ fontSize: "0.85rem", color: "rgb(var(--accent-2) / 0.7)" }}
-      >
-        アニメ・マッチ
-      </motion.p>
-
-      {/* title */}
+      {/* Editorial headline */}
       <motion.h1
-        className="font-display gradient-text glow-text"
-        style={{ fontSize: "clamp(3.6rem, 14vw, 9rem)", lineHeight: 0.9, letterSpacing: "-0.02em" }}
-        initial={{ opacity: 0, scale: 0.85, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 160, damping: 16, delay: 0.1 }}
+        className="font-display"
+        style={{
+          fontSize: "clamp(3.2rem, 11vw, 8.5rem)",
+          lineHeight: 0.92,
+          letterSpacing: "-0.04em",
+          fontWeight: 600,
+          color: "rgb(var(--text))",
+        }}
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
       >
-        AniMatch
+        Find{" "}
+        <span style={{ fontStyle: "italic", fontWeight: 400 }} className="gradient-text">something</span>
+        <br />
+        good to watch.
       </motion.h1>
 
-      {/* subtitle */}
+      {/* Subhead */}
       <motion.p
-        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
-        className="font-body mt-5 max-w-md text-base sm:text-lg"
-        style={{ color: "rgb(var(--text) / 0.6)" }}
+        className="font-body mt-8 max-w-lg"
+        style={{ fontSize: "clamp(1rem, 2.2vw, 1.2rem)", lineHeight: 1.6, color: "rgb(var(--text) / 0.55)" }}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
       >
-        Summon your next obsession ✦ tell the spirit a vibe and pull a card.
+        A recommender that learns the <em style={{ color: "rgb(var(--accent))", fontStyle: "italic" }}>shape</em> of
+        what you like — across {totalAnime.toLocaleString()} titles. Tell it a vibe, or just a name.
       </motion.p>
 
-      {/* living wish line */}
+      {/* Living example line */}
       <motion.div
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}
-        className="mt-8 flex items-center justify-center gap-2 font-mono text-sm flex-wrap"
+        className="mt-10 flex items-center gap-3 font-mono text-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
       >
-        <span style={{ color: "rgb(var(--accent) / 0.85)" }}>wish:</span>
-        <span className="relative inline-block h-[1.5em] overflow-hidden text-left" style={{ minWidth: "min(76vw, 340px)" }}>
-          {WISHES.map((v, i) => (
-            <motion.span key={v} className="absolute left-0 whitespace-nowrap" style={{ color: "rgb(var(--text) / 0.65)" }}
+        <span style={{ color: "rgb(var(--accent) / 0.8)" }}>try:</span>
+        <span className="relative inline-block h-[1.5em] overflow-hidden" style={{ minWidth: "min(70vw, 380px)" }}>
+          {VIBES.map((v, i) => (
+            <motion.span
+              key={v}
+              className="absolute left-0 whitespace-nowrap"
+              style={{ color: "rgb(var(--text) / 0.6)" }}
               initial={false}
-              animate={{ y: i === w ? 0 : i < w ? "-115%" : "115%", opacity: i === w ? 1 : 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+              animate={{ y: i === vibe ? 0 : i < vibe ? "-110%" : "110%", opacity: i === vibe ? 1 : 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
               “{v}”
             </motion.span>
           ))}
         </span>
-        <motion.span animate={{ opacity: [1, 0.2, 1] }} transition={{ duration: 1.1, repeat: Infinity }} style={{ color: "rgb(var(--accent))" }}>✦</motion.span>
+        <span className="animate-pulse" style={{ color: "rgb(var(--accent))" }}>▌</span>
       </motion.div>
 
-      {/* scroll cue */}
+      {/* Scroll cue */}
       <motion.button
-        onClick={() => document.getElementById("altar")?.scrollIntoView({ behavior: "smooth" })}
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
-        className="mt-14 flex flex-col items-center gap-2 group"
+        onClick={() => document.getElementById("discover")?.scrollIntoView({ behavior: "smooth" })}
+        className="mt-16 flex items-center gap-3 w-fit group"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.9 }}
       >
-        <span className="font-pop text-[11px] tracking-[0.25em] uppercase" style={{ color: "rgb(var(--accent))" }}>
-          enter the altar
+        <span className="font-mono text-[10px] tracking-[0.3em] uppercase transition-colors" style={{ color: "rgb(var(--text) / 0.4)" }}>
+          start
         </span>
-        <motion.span className="grid place-items-center w-10 h-10 rounded-full"
-          style={{ border: "1.5px solid rgb(var(--accent) / 0.4)", background: "rgb(var(--accent) / 0.08)" }}
-          animate={{ y: [0, 6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--accent))" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+        <motion.span
+          className="block w-9 h-9 rounded-full grid place-items-center"
+          style={{ border: "1px solid rgb(var(--accent) / 0.3)" }}
+          animate={{ y: [0, 5, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--accent))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 5v14M5 12l7 7 7-7" />
           </svg>
         </motion.span>

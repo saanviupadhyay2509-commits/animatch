@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, X, Star, ExternalLink } from "lucide-react";
+import { Heart, X, Star, ExternalLink } from "lucide-react";
 import { useFavorites } from "../lib/useFavorites";
 import { genreClass } from "../lib/genreColors";
 
@@ -41,9 +41,9 @@ export function FavoritesPanel({ open, onClose }: Props) {
           >
             <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: "1px solid rgb(var(--accent) / 0.12)" }}>
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4" style={{ fill: "rgb(var(--accent))", stroke: "rgb(var(--accent))" }} />
-                <h3 className="font-display text-lg" style={{ color: "rgb(var(--text))" }}>
-                  Collection
+                <Heart className="w-4 h-4" style={{ fill: "rgb(var(--accent))", stroke: "rgb(var(--accent))" }} />
+                <h3 className="font-display font-bold text-base" style={{ color: "rgb(var(--text))" }}>
+                  My List
                 </h3>
                 <span className="font-mono text-[10px]" style={{ color: "rgb(var(--accent) / 0.5)" }}>
                   {favorites.length}
@@ -57,9 +57,9 @@ export function FavoritesPanel({ open, onClose }: Props) {
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
               {favorites.length === 0 && (
                 <div className="text-center pt-16 px-6">
-                  <Sparkles className="w-8 h-8 mx-auto mb-3" style={{ color: "rgb(var(--accent) / 0.25)" }} />
-                  <p className="font-body text-[12px]" style={{ color: "rgb(var(--text) / 0.4)" }}>
-                    Tap the ✦ on any card to keep it in your collection.
+                  <Heart className="w-8 h-8 mx-auto mb-3" style={{ color: "rgb(var(--accent) / 0.2)" }} />
+                  <p className="font-mono text-[11px]" style={{ color: "rgb(var(--text) / 0.35)" }}>
+                    Tap the heart on any title to save it here.
                   </p>
                 </div>
               )}

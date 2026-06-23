@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, RefreshCw } from "lucide-react";
-import { GachaCard } from "./GachaCard";
-import { FeaturedSummon } from "./FeaturedSummon";
+import { AnimeCard } from "./AnimeCard";
+import { FeaturedCard } from "./FeaturedCard";
 import { ResultsToolbar, sortResults, type SortKey } from "./ResultsToolbar";
 import type { AnimeResult } from "@/lib/api";
 
@@ -68,8 +68,8 @@ export function ResultsGrid({ results, loading, error, onRetry, sort, onSortChan
             className="surface rounded-2xl p-10 text-center max-w-md mx-auto"
           >
             <AlertCircle className="w-8 h-8 mx-auto mb-4" style={{ color: "rgb(var(--accent))" }} />
-            <p className="font-display mb-2" style={{ color: "rgb(var(--text) / 0.9)", fontSize: "1.1rem" }}>
-              the summon fizzled…
+            <p className="font-display font-bold mb-2" style={{ color: "rgb(var(--text) / 0.85)", fontSize: "1.05rem" }}>
+              No results found
             </p>
             <p className="font-mono text-xs mb-6" style={{ color: "rgb(var(--text) / 0.4)" }}>{error}</p>
             {onRetry && (
@@ -79,7 +79,7 @@ export function ResultsGrid({ results, loading, error, onRetry, sort, onSortChan
                 style={{ color: "rgb(var(--accent) / 0.75)" }}
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                try a different wish
+                try different filters
               </button>
             )}
           </motion.div>
@@ -97,21 +97,20 @@ export function ResultsGrid({ results, loading, error, onRetry, sort, onSortChan
             />
 
             {/* #1 featured — re-keyed so it re-animates when the sort changes */}
-            <FeaturedSummon key={sorted[0].title} anime={sorted[0]} />
+            <FeaturedCard key={sorted[0].title} anime={sorted[0]} />
 
             {/* Rest */}
             {sorted.length > 1 && (
               <>
                 <div className="flex items-center gap-3 mb-4">
-                  <span style={{ color: "rgb(var(--accent) / 0.7)" }}>✦</span>
-                  <p className="font-pop text-[10px] tracking-[0.2em] uppercase" style={{ color: "rgb(var(--accent) / 0.6)" }}>
-                    more pulls
+                  <div className="w-[2px] h-4 rounded-full" style={{ background: "rgb(var(--accent) / 0.3)" }} />
+                  <p className="font-mono text-[9px] tracking-widest uppercase" style={{ color: "rgb(var(--accent) / 0.45)" }}>
+                    more picks for you
                   </p>
-                  <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgb(var(--accent) / 0.2), transparent)" }} />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {sorted.slice(1).map((anime, i) => (
-                    <GachaCard key={anime.title + i} anime={anime} index={i} />
+                    <AnimeCard key={anime.title + i} anime={anime} index={i} />
                   ))}
                 </div>
               </>

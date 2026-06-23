@@ -5,7 +5,7 @@ import { useTheme } from "./ThemeEngine";
 
 const ZONES: { id: string; label: string; anchor: string }[] = [
   { id: "night", label: "night", anchor: "hero" },
-  { id: "dusk",  label: "dusk",  anchor: "altar" },
+  { id: "dusk",  label: "dusk",  anchor: "discover" },
   { id: "dawn",  label: "dawn",  anchor: "results" },
 ];
 
