@@ -2,17 +2,20 @@
 // Server component that fetches metadata, then hands off to client components
 
 import { Suspense } from "react";
-import { fetchMeta } from "@/lib/api";
+import type { SiteMeta } from "@/lib/api";
+import { getMeta } from "@/lib/recommend";
 import { ClientPage } from "./ClientPage";
 
+// Meta (genres/moods/eras) is identical for everyone — bake it at build time.
+export const dynamic = "force-static";
+
 export default async function Page() {
-  // Fetch metadata on the server (genres, moods, eras list)
-  // This runs at request time — no loading spinner needed for the initial form
-  let meta;
+  // The trained model runs in this app's own serverless routes — read its
+  // metadata (genres, moods, eras) directly on the server.
+  let meta: SiteMeta;
   try {
-    meta = await fetchMeta();
+    meta = getMeta();
   } catch {
-    // If the backend is asleep (Render free tier), show a graceful fallback
     meta = {
       total_anime: 5000,
       available_genres: [

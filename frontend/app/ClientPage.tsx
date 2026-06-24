@@ -19,7 +19,6 @@ import { Bookmark } from "lucide-react";
 
 interface Props { meta: SiteMeta; }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const PIPELINE_MS = 2400; // signature reveal floor
 
 function looksLikeTitle(q: string): boolean {
@@ -72,7 +71,7 @@ export function ClientPage({ meta }: Props) {
 
       // Title lookup
       if (q && looksLikeTitle(q)) {
-        const res = await fetch(`${API_URL}/search`, {
+        const res = await fetch(`/api/search`, {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: q, top_n: 9 }),
         });

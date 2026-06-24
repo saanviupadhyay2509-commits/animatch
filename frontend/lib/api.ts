@@ -1,5 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
+// The model now runs inside this app's own serverless routes (/api/*),
+// so there is no external backend to configure.
 export interface AnimeResult {
   title: string;
   genre: string;
@@ -34,14 +34,8 @@ export interface RecommendRequest {
   top_n: number;
 }
 
-export async function fetchMeta(): Promise<SiteMeta> {
-  const res = await fetch(`${API_URL}/meta`, { next: { revalidate: 3600 } });
-  if (!res.ok) throw new Error("Failed to load metadata");
-  return res.json();
-}
-
 export async function fetchRecommendations(params: RecommendRequest): Promise<AnimeResult[]> {
-  const res = await fetch(`${API_URL}/recommend`, {
+  const res = await fetch(`/api/recommend`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(params),
