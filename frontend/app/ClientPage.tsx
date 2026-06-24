@@ -1,156 +1,198 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import {
   fetchRecommendations,
   type AnimeResult,
   type SiteMeta,
   type RecommendRequest,
 } from "@/lib/api";
-import { Hero }          from "./components/Hero";
-import { RecommendForm } from "./components/RecommendForm";
-import { ResultsGrid }   from "./components/ResultsGrid";
-import { SplashScreen }  from "./components/SplashScreen";
-import { NaturalSearch } from "./components/NaturalSearch";
-import { FavoritesPanel } from "./components/FavoritesPanel";
-import { FriendlyBird } from "./components/FriendlyBird";
-import LiquidEther from "./components/LiquidEther";
-import { birdSay } from "./lib/birdBus";
-import { useFavorites }   from "./lib/useFavorites";
-import { Heart } from "lucide-react";
+import { Sidebar } from "./components/Sidebar";
+import { Hero } from "./components/Hero";
+import { SearchPanel } from "./components/SearchPanel";
+import { Results } from "./components/Results";
+import { HowItWorks } from "./components/HowItWorks";
+import { SavedPanel } from "./components/SavedPanel";
+import { useFavorites } from "./lib/useFavorites";
+import { useWatchLater } from "./lib/useWatchLater";
+import { Bookmark } from "lucide-react";
 
 interface Props { meta: SiteMeta; }
 
-// Warm gold → sakura flow that matches the AniMatch palette.
-// Defined at module scope so the array identity is stable across renders.
-const LIQUID_COLORS = ["#8b6f3a", "#c9a55a", "#e8c07a", "#d4868a"];
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const PIPELINE_MS = 2400; // signature reveal floor
+
+function looksLikeTitle(q: string): boolean {
+  const lower = q.toLowerCase().trim();
+  const descriptive = /\b(something|show|anime|movie|want|like|feel|mood|genre|make|cry|sad|happy|scary|funny|chill|hype|dark|light|old|new|recent|classic|emotional|exciting|romantic|spooky|cozy|relaxing|binge|world|building|psychological|mystery|fantasy|action|female|lead|stressful)\b/;
+  return q.trim().split(/\s+/).length <= 4 && !descriptive.test(lower);
+}
 
 export function ClientPage({ meta }: Props) {
   const [results, setResults] = useState<AnimeResult[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
-  const [splash, setSplash]   = useState(true);
-  const [favOpen, setFavOpen] = useState(false);
-  const { favorites } = useFavorites();
+  const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [savedOpen, setSavedOpen] = useState(false);
+  const [active, setActive] = useState("home");
+  const [generated, setGenerated] = useState(0);
 
   const [filters, setFilters] = useState<RecommendRequest>({
-    genres: [], mood: null, era: "any", min_rating: 6.5, top_n: 6,
+    genres: [], mood: null, era: "any", min_rating: 6.5, top_n: 9,
   });
 
+  const { favorites } = useFavorites();
+  const { watchLater } = useWatchLater();
   const resultsRef = useRef<HTMLDivElement>(null);
+  const discoverRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setSplash(false), 2300);
-    return () => clearTimeout(timer);
+  const scrollTo = useCallback((ref: React.RefObject<HTMLDivElement>) => {
+    setTimeout(() => ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
   }, []);
 
-  function scrollToResults() {
-    setTimeout(() => {
-      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
-  }
-
-  async function handleSubmit(req?: RecommendRequest) {
-    const finalReq = req || filters;
-    setLoading(true);
+  // Core: run the pipeline reveal, resolve a request, fetch, show.
+  const run = useCallback(async (opts: { request?: RecommendRequest; q?: string }) => {
     setError(null);
     setResults(null);
-    scrollToResults();
+    setLoading(true);
+    scrollTo(resultsRef);
+    const started = performance.now();
+
+    const finish = async (data: AnimeResult[] | null, err: string | null) => {
+      const elapsed = performance.now() - started;
+      if (elapsed < PIPELINE_MS) await new Promise(r => setTimeout(r, PIPELINE_MS - elapsed));
+      setResults(data);
+      setError(err);
+      setLoading(false);
+      if (data && data.length) setGenerated(g => g + 1);
+    };
 
     try {
-      const data = await fetchRecommendations(finalReq);
-      setResults(data);
+      const q = (opts.q ?? "").trim();
 
-      // React to what the user searched for
-      if (finalReq.mood === "spooky") birdSay("mood_spooky");
-      else if (finalReq.mood === "cry") birdSay("mood_cry");
-      else if (finalReq.mood === "hype") birdSay("mood_hype");
-      else if (finalReq.genres?.some(g => g.toLowerCase() === "horror")) birdSay("genre_horror");
-      else if (finalReq.genres?.some(g => g.toLowerCase() === "romance")) birdSay("genre_romance");
-      else if (finalReq.genres?.some(g => g.toLowerCase() === "comedy")) birdSay("genre_comedy");
-      else if (finalReq.genres?.some(g => g.toLowerCase() === "action")) birdSay("genre_action");
-      else birdSay("results");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-      birdSay("no_results");
-    } finally {
-      setLoading(false);
+      // Title lookup
+      if (q && looksLikeTitle(q)) {
+        const res = await fetch(`${API_URL}/search`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: q, top_n: 9 }),
+        });
+        if (res.ok) return finish(await res.json(), null);
+        if (res.status === 404) return finish(null, `We couldn't find "${q}". Try describing the vibe instead.`);
+      }
+
+      // Natural-language description
+      if (q) {
+        const parseRes = await fetch("/api/parse-query", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: q }),
+        });
+        const params = await parseRes.json().catch(() => ({}));
+        if (!params.error) {
+          const req: RecommendRequest = {
+            genres: params.genres?.length ? params.genres : ["Drama"],
+            mood: params.mood ?? null,
+            era: params.era ?? "any",
+            min_rating: Math.min(params.min_rating ?? 6.0, 6.5),
+            top_n: 9,
+          };
+          return finish(await fetchRecommendations(req), null);
+        }
+      }
+
+      // Structured filters
+      const req = opts.request ?? filters;
+      if (!req.genres.length && !req.mood && !q) {
+        return finish(null, "Describe what you're in the mood for, or pick a mood or genre.");
+      }
+      return finish(await fetchRecommendations({ ...req, top_n: 9 }), null);
+    } catch (e: unknown) {
+      return finish(null, e instanceof Error ? e.message : "Something went wrong. Please try again.");
     }
-  }
+  }, [filters, scrollTo]);
+
+  const onGenerate = useCallback(() => { setActive("recs"); run({ q: query }); }, [query, run]);
+  const onSuggest = useCallback((q: string) => { setQuery(q); setActive("recs"); run({ q }); }, [run]);
+  const onExplore = useCallback(() => {
+    setActive("discover");
+    run({ request: { genres: ["Action", "Adventure", "Fantasy"], mood: null, era: "any", min_rating: 7.5, top_n: 9 } });
+  }, [run]);
+
+  const focusSearch = useCallback(() => {
+    scrollTo(discoverRef);
+    setTimeout(() => document.getElementById("anim-search")?.focus(), 320);
+  }, [scrollTo]);
+
+  const onNavigate = useCallback((key: string) => {
+    setActive(key);
+    if (key === "saved" || key === "history") { setSavedOpen(true); return; }
+    if (key === "home") window.scrollTo({ top: 0, behavior: "smooth" });
+    else if (key === "discover" || key === "recs") focusSearch();
+    else if (key === "about" || key === "settings") document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+  }, [focusSearch]);
+
+  const avgMatch = useMemo(() => {
+    if (!results?.length) return 0;
+    const norm = (x: number) => (x <= 1 ? x * 100 : x);
+    return Math.round(results.reduce((s, a) => s + norm(a.match_score > 0 ? a.match_score : a.similarity), 0) / results.length);
+  }, [results]);
+
+  const stats = [
+    { label: "Recommendations", value: generated },
+    { label: "Avg match", value: results?.length ? `${avgMatch}%` : "—" },
+    { label: "Saved", value: favorites.length },
+    { label: "Watch later", value: watchLater.length },
+  ];
 
   return (
-    <>
-      {/* Liquid fluid background — sits behind everything, never blocks clicks */}
-      <div className="fixed inset-0" style={{ zIndex: 0, pointerEvents: "none", opacity: 0.5 }} aria-hidden="true">
-        <LiquidEther
-          colors={LIQUID_COLORS}
-          mouseForce={18}
-          cursorSize={90}
-          resolution={0.5}
-          autoDemo
-          autoSpeed={0.4}
-          autoIntensity={1.9}
-          takeoverDuration={0.25}
-          autoResumeDelay={2500}
-        />
+    <div>
+      <Sidebar active={active} onNavigate={onNavigate} savedCount={favorites.length} />
+
+      {/* Mobile top bar */}
+      <div className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3"
+        style={{ background: "rgba(14,14,16,0.85)", borderBottom: "1px solid var(--border)", backdropFilter: "blur(12px)" }}>
+        <span className="font-display font-600" style={{ fontWeight: 600 }}>AniMatch</span>
+        <button onClick={() => setSavedOpen(true)} className="btn btn-ghost p-2 relative">
+          <Bookmark className="w-5 h-5" />
+          {favorites.length > 0 && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: "var(--accent)" }} />}
+        </button>
       </div>
 
-      <SplashScreen visible={splash} />
+      <div className="md:pl-[244px] pb-16 md:pb-0">
+        <Hero totalAnime={meta.total_anime} onGenerate={focusSearch} onExplore={onExplore} />
 
-      <div className="relative" style={{ zIndex: 1 }}>
-      <Hero totalAnime={meta.total_anime} />
+        <div ref={discoverRef} className="scroll-mt-6">
+          <SearchPanel meta={meta} query={query} setQuery={setQuery} filters={filters} setFilters={setFilters} onGenerate={onGenerate} loading={loading} />
+        </div>
 
-      {/* Floating "My List" button */}
-      <button
-        onClick={() => setFavOpen(true)}
-        className="fixed top-5 right-5 z-30 flex items-center gap-2 px-3.5 py-2 rounded-full transition-all duration-200"
-        style={{
-          background: "rgba(16,22,36,0.8)",
-          border: "1px solid rgba(232,184,75,0.18)",
-          backdropFilter: "blur(12px)",
-        }}
-      >
-        <Heart
-          className="w-4 h-4"
-          style={{ fill: favorites.length > 0 ? "#e8829a" : "transparent", stroke: "#e8829a" }}
-        />
-        <span className="font-mono text-[11px]" style={{ color: "rgba(242,234,216,0.6)" }}>
-          {favorites.length}
-        </span>
-      </button>
+        {/* Session stats */}
+        <div className="max-w-3xl mx-auto px-6 mt-6">
+          <div className="grid grid-cols-4 gap-2">
+            {stats.map(s => (
+              <div key={s.label} className="card p-3 text-center">
+                <p className="font-display font-600 text-lg tnum" style={{ fontWeight: 600, color: "var(--text)" }}>{s.value}</p>
+                <p className="text-[10.5px] mt-0.5" style={{ color: "var(--text-subtle)" }}>{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      <FavoritesPanel open={favOpen} onClose={() => setFavOpen(false)} />
-      <FriendlyBird />
+        <div ref={resultsRef} className="scroll-mt-6">
+          <Results results={results} loading={loading} error={error} onSuggest={onSuggest} onRetry={() => { setResults(null); setError(null); focusSearch(); }} />
+        </div>
 
-      <NaturalSearch
-        onSubmit={(parsed) => { setFilters(parsed); handleSubmit(parsed); }}
-        setResults={(r) => setResults(r)}
-        setLoading={setLoading}
-        setError={setError}
-        scrollToResults={scrollToResults}
-      />
+        <HowItWorks />
 
-      <RecommendForm
-        meta={meta}
-        onSubmit={handleSubmit}
-        loading={loading}
-        filters={filters}
-        setFilters={setFilters}
-      />
-
-      <div ref={resultsRef}>
-        <ResultsGrid
-          results={results}
-          loading={loading}
-          error={error}
-          onRetry={() => setResults(null)}
-        />
+        <footer className="max-w-5xl mx-auto px-6 pb-16">
+          <div className="h-px mb-6" style={{ background: "var(--border)" }} />
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="font-serif text-lg" style={{ color: "var(--text)" }}>AniMatch</p>
+            <p className="text-[12.5px] text-center sm:text-right" style={{ color: "var(--text-subtle)" }}>
+              Built for people who spend more time choosing than watching.
+            </p>
+          </div>
+        </footer>
       </div>
 
-      <footer className="text-center pb-12 text-white/15 text-xs font-body">
-        AniMatch · BUSS305 Final Project · Built with FastAPI + Next.js
-      </footer>
-      </div>
-    </>
+      <SavedPanel open={savedOpen} onClose={() => setSavedOpen(false)} />
+    </div>
   );
 }

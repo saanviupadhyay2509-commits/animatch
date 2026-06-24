@@ -4,6 +4,7 @@ import { useSyncExternalStore, useCallback } from "react";
 import type { AnimeResult } from "@/lib/api";
 
 const STORAGE_KEY = "animatch:favorites";
+const EMPTY: AnimeResult[] = [];
 
 let favorites: AnimeResult[] = [];
 let hydrated = false;
@@ -43,7 +44,7 @@ function getSnapshot() {
 }
 
 function getServerSnapshot() {
-  return [] as AnimeResult[];
+  return EMPTY;
 }
 
 export function useFavorites() {
